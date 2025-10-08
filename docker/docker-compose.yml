@@ -1,0 +1,17 @@
+services:
+  db:
+    image: postgres:16
+    container_name: my-postgres-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: bankApp
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: admin
+    ports:
+      - "3306:3306"
+    expose:
+      - "3306"
+    volumes:
+      - db:/var/lib/postgresql/data
+volumes:
+  db:
