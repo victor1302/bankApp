@@ -30,11 +30,11 @@ public class User {
     )
     private Account userAccount;
     @Column(nullable = false)
-    private String name;
+    private String username;
     private String phoneNumber;
-    private String Address;
+    private String address;
     private int age;
-    @Column(length = 8, nullable = false)
+    @Column(nullable = false)
     private String password;
 
 
@@ -62,12 +62,12 @@ public class User {
         this.userAccount = userAccount;
     }
 
-    public String getName() {
-        return name;
+    public String getUsername() {
+        return username;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setUsername(String name) {
+        this.username = name;
     }
 
     public String getPhoneNumber() {
@@ -79,11 +79,11 @@ public class User {
     }
 
     public String getAddress() {
-        return Address;
+        return address;
     }
 
     public void setAddress(String address) {
-        Address = address;
+        this.address = address;
     }
 
     public int getAge() {
