@@ -1,17 +1,13 @@
 package com.bankapp.service;
 
-import com.bankapp.dto.User.CreateUserDto;
 import com.bankapp.entity.Role;
 import com.bankapp.entity.User;
 import com.bankapp.exception.UserAlreadyExistsException;
 import com.bankapp.repository.RoleRepository;
 import com.bankapp.repository.UserRepository;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.net.http.HttpTimeoutException;
 import java.util.List;
 import java.util.Set;
 
@@ -36,6 +32,8 @@ public class UserService {
         if(userRepository.existsByUsername(username)){
             throw new UserAlreadyExistsException("Usuário já existe!");
         }
+
+
         User user = new User();
         user.setUsername(username);
         user.setPassword(passwordEncoder.encode(password));
@@ -50,4 +48,5 @@ public class UserService {
         var users = userRepository.findAll();
         return users;
     }
+
 }

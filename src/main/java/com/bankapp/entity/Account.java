@@ -15,6 +15,10 @@ public class Account {
     private int AccountNumber;
     private BigDecimal balance;
 
+
+    @OneToOne(mappedBy = "userAccount", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private User userAccount;
+
     public Long getAccountId() {
         return accountId;
     }
