@@ -3,12 +3,17 @@ package com.bankapp.service;
 import com.bankapp.entity.Role;
 import com.bankapp.entity.User;
 import com.bankapp.exception.UserAlreadyExistsException;
+import com.bankapp.interfaces.UserProjection;
 import com.bankapp.repository.RoleRepository;
 import com.bankapp.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import java.util.List;
+
 import java.util.Set;
 
 @Service
@@ -44,9 +49,8 @@ public class UserService {
         return userRepository.save(user);
     }
     @Transactional
-    public List<User> listUsers(){
-        var users = userRepository.findAll();
-        return users;
+    public Page<UserProjection> getUsers(Pageable pageable){
+        return userRepository.findAllBy(pageable);
     }
 
 }
