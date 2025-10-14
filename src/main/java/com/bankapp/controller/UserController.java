@@ -2,14 +2,15 @@ package com.bankapp.controller;
 
 import com.bankapp.dto.User.CreateUserDto;
 import com.bankapp.entity.User;
+import com.bankapp.interfaces.UserProjection;
 import com.bankapp.service.UserService;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -29,8 +30,11 @@ public class UserController {
 
     @GetMapping("/user")
     @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
-    public ResponseEntity<List<User>> listUsers(){
-        List<User> users = userService.listUsers();
+    public ResponseEntity<Page<UserProjection>> getUsers(@RequestParam(defaultValue = "0") int page,
+                                         @RequestParam(defaultValue = "10") int size){
+        Pageable pageable = PageRequest.of(page, size);
+        Page<UserProjection> users = userService.getUsers(pageable);
         return ResponseEntity.ok(users);
     }
+
 }
