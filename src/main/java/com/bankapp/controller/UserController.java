@@ -1,7 +1,5 @@
 package com.bankapp.controller;
-
 import com.bankapp.dto.User.CreateUserDto;
-import com.bankapp.entity.User;
 import com.bankapp.interfaces.UserProjection;
 import com.bankapp.service.UserService;
 import org.springframework.data.domain.Page;
@@ -12,7 +10,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.List;
 
 @RestController
 public class UserController {

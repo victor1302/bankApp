@@ -1,5 +1,6 @@
 package com.bankapp.entity;
 
+import jakarta.annotation.Generated;
 import jakarta.persistence.*;
 
 import java.math.BigDecimal;
@@ -12,11 +13,11 @@ public class Account {
     @GeneratedValue(strategy = GenerationType.SEQUENCE)
     @Column(name = "account_id")
     private Long accountId;
-    private int AccountNumber;
+    private int accountNumber;
     private BigDecimal balance;
 
-
-    @OneToOne(mappedBy = "userAccount", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", unique = true)
     private User userAccount;
 
     public Long getAccountId() {
@@ -28,11 +29,11 @@ public class Account {
     }
 
     public int getAccountNumber() {
-        return AccountNumber;
+        return accountNumber;
     }
 
     public void setAccountNumber(int accountNumber) {
-        AccountNumber = accountNumber;
+        this.accountNumber = accountNumber;
     }
 
     public BigDecimal getBalance() {
@@ -41,5 +42,13 @@ public class Account {
 
     public void setBalance(BigDecimal balance) {
         this.balance = balance;
+    }
+
+    public User getUserAccount() {
+        return userAccount;
+    }
+
+    public void setUserAccount(User userAccount) {
+        this.userAccount = userAccount;
     }
 }

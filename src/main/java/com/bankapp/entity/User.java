@@ -23,12 +23,7 @@ public class User {
     )
     private Set<Role> userRole;
 
-    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    @JoinTable(
-            name = "tb_users_account",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "account_id")
-    )
+    @OneToOne(mappedBy = "userAccount", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     private Account userAccount;
     @Column(nullable = false)
     private String username;
