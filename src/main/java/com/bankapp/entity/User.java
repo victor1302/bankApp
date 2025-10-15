@@ -1,8 +1,10 @@
 package com.bankapp.entity;
 
 import jakarta.persistence.*;
+import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.time.Instant;
 import java.util.Set;
 import java.util.UUID;
 
@@ -29,6 +31,9 @@ public class User {
     private String username;
     private String phoneNumber;
     private String address;
+
+    @CreationTimestamp
+    private Instant creationTimestamp;
     private int age;
     @Column(nullable = false)
     private String password;
