@@ -13,6 +13,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -35,7 +36,7 @@ public class UserService {
         var basicRole = roleRepository.findByName(Role.Values.BASIC.name());
 
         if(userRepository.existsByUsername(username)){
-            throw new UserAlreadyExistsException("Usuário já existe!");
+            throw new UserAlreadyExistsException("User already exists!");
         }
         User user = new User();
         user.setUsername(username);
@@ -53,12 +54,19 @@ public class UserService {
     }
     @Transactional
     public User disableUser(UUID userId){
+
+
         return userRepository.findById(userId)
                 .map(user ->{
+                    if(!user.isActive()){
+                        throw new UserAlreadyIsDisableOrNotPresent("User not present or already exists");
+                    }
                     user.setActive(false);
                     return userRepository.save(user);
                 })
                 .orElseThrow(()-> new UserAlreadyExistsException("a"));
+
+
     }
 
 
