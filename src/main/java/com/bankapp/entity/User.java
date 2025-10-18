@@ -31,7 +31,7 @@ public class User {
     private String username;
     private String phoneNumber;
     private String address;
-
+    private boolean isActive;
     @CreationTimestamp
     private Instant creationTimestamp;
     private int age;
@@ -101,6 +101,22 @@ public class User {
 
     public void setPassword(String password) {
         this.password = password;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
+    }
+
+    public Instant getCreationTimestamp() {
+        return creationTimestamp;
+    }
+
+    public void setCreationTimestamp(Instant creationTimestamp) {
+        this.creationTimestamp = creationTimestamp;
     }
 
     public boolean isLoginCorret(String password, PasswordEncoder passwordEncoder) {
