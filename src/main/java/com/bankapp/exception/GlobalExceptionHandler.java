@@ -17,4 +17,8 @@ public class GlobalExceptionHandler{
     public ResponseEntity<String> handleBadCredentialException(BadCredentialException ex){
         return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
     }
+    @ExceptionHandler(UserAlreadyIsDisableOrNotPresent.class)
+    public ResponseEntity<String> handleUserAlreadyIsDisableOrNotPresent(UserAlreadyIsDisableOrNotPresent ex){
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    }
 }

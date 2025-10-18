@@ -10,4 +10,5 @@ public interface UserProjection {
     AccountProjection getUserAccount();
     String getAddress();
     int getAge();
+    boolean getisActive();
 }

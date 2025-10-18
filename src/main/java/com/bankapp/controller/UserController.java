@@ -10,6 +10,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.UUID;
+
 
 @RestController
 public class UserController {
@@ -32,6 +34,13 @@ public class UserController {
         Pageable pageable = PageRequest.of(page, size);
         Page<UserProjection> users = userService.getUsers(pageable);
         return ResponseEntity.ok(users);
+    }
+
+    @PutMapping("/user/{id}")
+    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
+    public ResponseEntity<Void> disableUser(@PathVariable UUID id){
+        userService.disableUser(id);
+        return ResponseEntity.status(HttpStatus.OK).build();
     }
 
 }

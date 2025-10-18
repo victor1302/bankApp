@@ -3,6 +3,7 @@ package com.bankapp.service;
 import com.bankapp.entity.Role;
 import com.bankapp.entity.User;
 import com.bankapp.exception.UserAlreadyExistsException;
+import com.bankapp.exception.UserAlreadyIsDisableOrNotPresent;
 import com.bankapp.interfaces.UserProjection;
 import com.bankapp.repository.RoleRepository;
 import com.bankapp.repository.UserRepository;
@@ -13,6 +14,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 public class UserService {
@@ -41,6 +43,7 @@ public class UserService {
         user.setPhoneNumber(phoneNumber);
         user.setAddress(address);
         user.setAge(age);
+        user.setActive(true);
         user.setUserRole(Set.of(basicRole));
         return userRepository.save(user);
     }
@@ -48,5 +51,15 @@ public class UserService {
     public Page<UserProjection> getUsers(Pageable pageable){
         return userRepository.findAllBy(pageable);
     }
+    @Transactional
+    public User disableUser(UUID userId){
+        return userRepository.findById(userId)
+                .map(user ->{
+                    user.setActive(false);
+                    return userRepository.save(user);
+                })
+                .orElseThrow(()-> new UserAlreadyExistsException("a"));
+    }
+
 
 }
