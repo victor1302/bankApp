@@ -31,13 +31,11 @@ public class AccountService {
                 .orElseThrow(()-> new RuntimeException("Usuário não encontrado"));
 
         Integer lastAccountNumber = accountRepository.findMaxAccountNumber();
-        System.out.println("numero aq9e8q2ieudhquiod: "+lastAccountNumber);
         int newAccountNumber = (lastAccountNumber != null) ? lastAccountNumber + 1 : 1;
-        System.out.println("novo numero aq9e8q2ieudhquiod: "+newAccountNumber);
 
         Account newAccount = new Account();
         newAccount.setUserAccount(user);
-        newAccount.setBalance(BigDecimal.valueOf(50.00));
+        newAccount.setBalance(BigDecimal.valueOf(0));
         newAccount.setAccountNumber(newAccountNumber);
 
         user.setUserAccount(newAccount);

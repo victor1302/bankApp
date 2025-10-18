@@ -3,9 +3,12 @@ package com.bankapp.service;
 import com.bankapp.entity.Account;
 import com.bankapp.entity.Transaction;
 import com.bankapp.entity.User;
+import com.bankapp.interfaces.TransactionProjection;
 import com.bankapp.repository.AccountRepository;
 import com.bankapp.repository.TransactionRepository;
 import com.bankapp.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -40,7 +43,7 @@ public class TransactionService {
 
         Transaction transaction = new Transaction();
         if(sourceAccount.getBalance().compareTo(amount) < 0){
-            new RuntimeException("You dont have money enought");
+            throw new RuntimeException("You don't have enough money");
         }
         transaction.setAmount(amount);
         transaction.setSourceAccount(sourceAccount);
@@ -49,5 +52,10 @@ public class TransactionService {
         destinationAccount.setBalance(destinationAccount.getBalance().add(amount));
 
         return transactionRepository.save(transaction);
+    }
+
+    @Transactional
+    public Page<TransactionProjection> getTransactions(Pageable pageable){
+        return transactionRepository.findAllBy(pageable);
     }
 }
