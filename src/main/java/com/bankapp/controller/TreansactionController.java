@@ -22,14 +22,14 @@ public class TreansactionController {
     }
 
     @PostMapping("/transaction")
-    @PreAuthorize("hasAnyAuthority('SCOPE_BASIC', 'SCOPE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_BASIC')")
     public ResponseEntity<Void> createTransaction(JwtAuthenticationToken jwtAuthenticationToken, @RequestBody CreateTransactionDto createTransactionDto){
         transactionService.createTransaction(jwtAuthenticationToken, createTransactionDto.destinationAccountId(), createTransactionDto.amount());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
     @GetMapping("/transaction")
-    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Page<TransactionProjection>> getTransactions(@RequestParam(defaultValue = "0") int page,
                                                                        @RequestParam(defaultValue = "10") int size){
         Pageable pageable = PageRequest.of(page,size);

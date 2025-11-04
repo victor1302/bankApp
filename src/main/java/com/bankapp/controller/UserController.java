@@ -21,14 +21,14 @@ public class UserController {
         this.userService = userService;
     }
 
-    @PostMapping("/user")
+    @PostMapping("/auth/register")
     public ResponseEntity<Void> createUser(@RequestBody CreateUserDto createUserDto){
-        userService.createUser(createUserDto.username(), createUserDto.password(), createUserDto.phoneNumber(), createUserDto.address(), createUserDto.age());
+        userService.createUser(createUserDto.username(), createUserDto.password(), createUserDto.phoneNumber(), createUserDto.address(), createUserDto.age(), createUserDto.email());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @GetMapping("/user")
-    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
+    @GetMapping("/users")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Page<UserProjection>> getUsers(@RequestParam(defaultValue = "0") int page,
                                          @RequestParam(defaultValue = "10") int size){
         Pageable pageable = PageRequest.of(page, size);
@@ -37,10 +37,20 @@ public class UserController {
     }
 
     @PutMapping("/user/{id}")
-    @PreAuthorize("hasAuthority('SCOPE_ADMIN')")
+    @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Void> disableUser(@PathVariable UUID id){
         userService.disableUser(id);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
+
+    @GetMapping("/user")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_BASIC')")
+    public ResponseEntity<Page<UserProjection>> getUser(@RequestParam(defaultValue = "0") int page,
+                                                        @RequestParam(defaultValue = "1") int size){
+        Pageable pageable = PageRequest.of(page, size);
+        Page<UserProjection> user = userService.getUsers(pageable);
+        return ResponseEntity.ok(user);
+    }
+
 
 }

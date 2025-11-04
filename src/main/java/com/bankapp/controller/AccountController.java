@@ -19,7 +19,7 @@ public class AccountController {
     }
 
     @PostMapping("/account")
-    @PreAuthorize("hasAnyAuthority('SCOPE_BASIC', 'SCOPE_ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_BASIC')")
     public ResponseEntity<Void> createAccount(JwtAuthenticationToken token){
         accountService.createAccount(token);
         return ResponseEntity.status(HttpStatus.CREATED).build();

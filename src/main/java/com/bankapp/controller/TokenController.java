@@ -3,7 +3,7 @@ package com.bankapp.controller;
 
 import com.bankapp.dto.User.LoginRequestDto;
 import com.bankapp.dto.User.LoginResponseDto;
-import com.bankapp.service.TokenService;
+import com.bankapp.service.UserService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -12,17 +12,18 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class TokenController {
 
-    private final TokenService tokenService;
+    private final UserService userService;
 
-    public TokenController(TokenService tokenService) {
-        this.tokenService = tokenService;
+    public TokenController(UserService userService) {
+        this.userService = userService;
     }
 
-    @PostMapping("/login")
+    @PostMapping("/auth/login")
     public ResponseEntity<LoginResponseDto> userLogin(@RequestBody LoginRequestDto loginRequestDto){
 
-        LoginResponseDto login = tokenService.login(loginRequestDto.username(), loginRequestDto.password());
+        LoginResponseDto login = userService.loginUser(loginRequestDto);
 
         return ResponseEntity.ok(login);
     }
+
 }

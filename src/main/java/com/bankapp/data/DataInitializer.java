@@ -55,6 +55,7 @@ public class DataInitializer implements CommandLineRunner {
                     var user = new User();
                     user.setUsername("admin");
                     user.setPassword(passwordEncoder.encode("123"));
+                    user.setEmail("admin@admin.com");
                     user.setPhoneNumber("-");
                     user.setAddress("-");
                     user.setActive(true);

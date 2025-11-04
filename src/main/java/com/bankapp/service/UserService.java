@@ -1,5 +1,7 @@
 package com.bankapp.service;
 
+import com.bankapp.dto.User.LoginRequestDto;
+import com.bankapp.dto.User.LoginResponseDto;
 import com.bankapp.entity.Role;
 import com.bankapp.entity.User;
 import com.bankapp.exception.UserAlreadyExistsException;
@@ -7,6 +9,7 @@ import com.bankapp.exception.UserAlreadyIsDisableOrNotPresent;
 import com.bankapp.interfaces.UserProjection;
 import com.bankapp.repository.RoleRepository;
 import com.bankapp.repository.UserRepository;
+import com.bankapp.security.TokenService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -22,17 +25,29 @@ public class UserService {
 
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
+    private final TokenService tokenService;
     private final PasswordEncoder passwordEncoder;
 
 
-    public UserService(RoleRepository roleRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public UserService(RoleRepository roleRepository, UserRepository userRepository, TokenService tokenService, PasswordEncoder passwordEncoder) {
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
+        this.tokenService = tokenService;
         this.passwordEncoder = passwordEncoder;
     }
 
+    public LoginResponseDto loginUser(LoginRequestDto loginRequestDto){
+        User user = this.userRepository.findByEmail(loginRequestDto.email()).orElseThrow(() -> new RuntimeException("Credentials Invalid"));
+        if(passwordEncoder.matches(loginRequestDto.password(), user.getPassword())){
+            String token = this.tokenService.generateToken(user);
+            return new LoginResponseDto(user.getEmail(), token);
+        }
+        throw new RuntimeException("Invalid credentials");
+    }
+
+
     @Transactional
-    public User createUser(String username, String password, String phoneNumber, String address, int age){
+    public User createUser(String username, String password, String phoneNumber, String address, int age, String email){
         var basicRole = roleRepository.findByName(Role.Values.BASIC.name());
 
         if(userRepository.existsByUsername(username)){
@@ -44,6 +59,7 @@ public class UserService {
         user.setPhoneNumber(phoneNumber);
         user.setAddress(address);
         user.setAge(age);
+        user.setEmail(email);
         user.setActive(true);
         user.setUserRole(Set.of(basicRole));
         return userRepository.save(user);
@@ -54,8 +70,6 @@ public class UserService {
     }
     @Transactional
     public User disableUser(UUID userId){
-
-
         return userRepository.findById(userId)
                 .map(user ->{
                     if(!user.isActive()){
@@ -64,9 +78,7 @@ public class UserService {
                     user.setActive(false);
                     return userRepository.save(user);
                 })
-                .orElseThrow(()-> new UserAlreadyExistsException("a"));
-
-
+                .orElseThrow(()-> new UserAlreadyExistsException("User not present or already exists"));
     }
 
 

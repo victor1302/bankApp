@@ -31,6 +31,7 @@ public class User {
     private String username;
     private String phoneNumber;
     private String address;
+    private String email;
     private boolean isActive;
     @CreationTimestamp
     private Instant creationTimestamp;
@@ -121,5 +122,13 @@ public class User {
 
     public boolean isLoginCorret(String password, PasswordEncoder passwordEncoder) {
         return passwordEncoder.matches(password, this.password);
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
     }
 }
