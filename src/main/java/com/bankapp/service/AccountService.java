@@ -1,5 +1,6 @@
 package com.bankapp.service;
 
+import com.bankapp.dto.Account.CreateAccountResponseDto;
 import com.bankapp.entity.Account;
 import com.bankapp.entity.User;
 import com.bankapp.repository.AccountRepository;
@@ -25,7 +26,7 @@ public class AccountService {
     }
 
     @Transactional
-    public Account createAccount(){
+    public CreateAccountResponseDto createAccount(){
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         user = userRepository.findByEmail(user.getEmail()).orElseThrow();
 
@@ -38,7 +39,7 @@ public class AccountService {
         newAccount.setAccountNumber(newAccountNumber);
         user.setUserAccount(newAccount);
 
-        return accountRepository.save(newAccount);
+        return new CreateAccountResponseDto(newAccount.getAccountNumber(), newAccount.getBalance());
     }
 
 }
