@@ -1,7 +1,9 @@
 package com.bankapp.data;
 
+import com.bankapp.entity.Account;
 import com.bankapp.entity.Role;
 import com.bankapp.entity.User;
+import com.bankapp.repository.AccountRepository;
 import com.bankapp.repository.RoleRepository;
 import com.bankapp.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
@@ -9,6 +11,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -18,12 +21,14 @@ public class DataInitializer implements CommandLineRunner {
 
     private final RoleRepository roleRepository;
     private final UserRepository userRepository;
+    private final AccountRepository accountRepository;
     private final PasswordEncoder passwordEncoder;
 
 
-    public DataInitializer(RoleRepository roleRepository, UserRepository userRepository, PasswordEncoder passwordEncoder) {
+    public DataInitializer(RoleRepository roleRepository, UserRepository userRepository, AccountRepository accountRepository, PasswordEncoder passwordEncoder) {
         this.roleRepository = roleRepository;
         this.userRepository = userRepository;
+        this.accountRepository = accountRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
@@ -61,7 +66,14 @@ public class DataInitializer implements CommandLineRunner {
                     user.setActive(true);
                     user.setAge(99);
                     user.setUserRole(Set.of(adminRole));
+
+                    var account = new Account();
+                    account.setUserAccount(user);
+                    account.setBalance(BigDecimal.valueOf(999999999));
+                    account.setAccountNumber(0);
+                    user.setUserAccount(account);
                     userRepository.save(user);
+                    accountRepository.save(account);
 
                 }
         );
