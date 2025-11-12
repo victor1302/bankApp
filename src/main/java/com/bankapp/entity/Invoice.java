@@ -6,6 +6,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.YearMonth;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "tb_invoices")
@@ -27,6 +29,9 @@ public class Invoice {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "card_id", nullable = false)
     private Card creditCard;
+
+    @OneToMany(mappedBy = "installmentId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Installment> installments = new ArrayList<>();
 
     public enum InvoiceStatus{
         GENERATED,

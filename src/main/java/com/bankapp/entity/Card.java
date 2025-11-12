@@ -5,6 +5,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -22,8 +23,8 @@ public class Card {
     private BigDecimal availableLimit;
     private boolean isBlocked;
 
-    @OneToMany(mappedBy = "cardId", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Invoice> cardInvoice;
+    @OneToMany(mappedBy = "invoiceId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Invoice> cardInvoice = new ArrayList<>();
 
     @CreationTimestamp
     private Instant creationTimestamp;
