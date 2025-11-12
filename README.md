@@ -29,9 +29,9 @@ Este projeto foi construído com foco em **boas práticas**, **segurança**, **m
 
 ### 💰 Operações Financeiras
 - Consulta de **saldo**.
-- Registro de **transferências** entre contas *(em produção)*.
-- Histórico de transações *(em produção)*.
-- Regras de negócio com **validações automáticas** (ex: saldo insuficiente) *(em produção)*.
+- Registro de **transferências** entre contas.
+- Histórico de transações.
+- Regras de negócio com **validações automáticas** (ex: saldo insuficiente).
 
 ### 📄 Listagens Customizadas e Paginadas
 - Suporte a **filtros dinâmicos** via *query params*.

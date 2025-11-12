@@ -2,13 +2,14 @@ package com.bankapp.controller;
 
 import com.bankapp.dto.Account.CreateAccountResponseDto;
 import com.bankapp.service.AccountService;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
+@RequestMapping(value = "/api/v1")
 public class AccountController {
 
     private final AccountService accountService;

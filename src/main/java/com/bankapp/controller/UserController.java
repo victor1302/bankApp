@@ -27,7 +27,7 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 
-    @GetMapping("/users")
+    @GetMapping("/api/v1/users")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Page<UserProjection>> getUsers(@RequestParam(defaultValue = "0") int page,
                                          @RequestParam(defaultValue = "10") int size){
@@ -36,14 +36,14 @@ public class UserController {
         return ResponseEntity.ok(users);
     }
 
-    @PutMapping("/user/{id}")
+    @PutMapping("/api/v1/user/{id}")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Void> disableUser(@PathVariable UUID id){
         userService.disableUser(id);
         return ResponseEntity.status(HttpStatus.OK).build();
     }
 
-    @GetMapping("/user")
+    @GetMapping("/api/v1/user")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_BASIC')")
     public ResponseEntity<Page<UserProjection>> getUser(@RequestParam(defaultValue = "0") int page,
                                                         @RequestParam(defaultValue = "1") int size){
