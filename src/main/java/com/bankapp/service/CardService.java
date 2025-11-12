@@ -32,7 +32,7 @@ public class CardService {
     @Transactional
     public Card createCard(){
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-        user = userRepository.findByEmail(user.getEmail()).orElseThrow();
+        user = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new RuntimeException("User not found"));
 
         Account account = accountRepository.findById(user.getUserAccount().getAccountId()).orElseThrow();
 
