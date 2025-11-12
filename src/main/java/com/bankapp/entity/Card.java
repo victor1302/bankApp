@@ -5,6 +5,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.util.List;
 
 @Entity
 @Table(name = "tb_cards")
@@ -20,6 +21,9 @@ public class Card {
     private BigDecimal creditLimit;
     private BigDecimal availableLimit;
     private boolean isBlocked;
+
+    @OneToMany(mappedBy = "cardId", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Invoice> cardInvoice;
 
     @CreationTimestamp
     private Instant creationTimestamp;
