@@ -1,6 +1,5 @@
 package com.bankapp.entity;
 
-import jakarta.annotation.Generated;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -22,6 +21,10 @@ public class Account {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", unique = true)
     private User userAccount;
+
+    @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JoinColumn(name = "card_id", unique = true)
+    private Card cardAccount;
 
 
     public Long getAccountId() {
@@ -54,5 +57,21 @@ public class Account {
 
     public void setUserAccount(User userAccount) {
         this.userAccount = userAccount;
+    }
+
+    public Instant getCreationTimestamp() {
+        return creationTimestamp;
+    }
+
+    public void setCreationTimestamp(Instant creationTimestamp) {
+        this.creationTimestamp = creationTimestamp;
+    }
+
+    public Card getCardAccount() {
+        return cardAccount;
+    }
+
+    public void setCardAccount(Card cardAccount) {
+        this.cardAccount = cardAccount;
     }
 }

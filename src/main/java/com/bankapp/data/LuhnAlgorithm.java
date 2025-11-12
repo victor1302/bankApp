@@ -1,8 +1,8 @@
 package com.bankapp.data;
 
-import java.math.BigInteger;
+public class LuhnAlgorithm {
 
-public class LuhnAlgotithm {
+    // Number from Stripe page example
     String randomCard = "79927398713";
 
     public static boolean validateLuhn(String cardNumber){

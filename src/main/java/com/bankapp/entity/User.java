@@ -27,6 +27,7 @@ public class User {
 
     @OneToOne(mappedBy = "userAccount", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
     private Account userAccount;
+
     @Column(nullable = false)
     private String username;
     private String phoneNumber;
