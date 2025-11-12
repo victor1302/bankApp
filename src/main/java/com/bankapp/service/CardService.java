@@ -1,6 +1,7 @@
 package com.bankapp.service;
 
 import com.bankapp.data.LuhnAlgorithm;
+import com.bankapp.dto.Card.CardCreateResponseDto;
 import com.bankapp.entity.Account;
 import com.bankapp.entity.Card;
 import com.bankapp.entity.User;
@@ -30,7 +31,7 @@ public class CardService {
     }
 
     @Transactional
-    public Card createCard(){
+    public CardCreateResponseDto createCard(){
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         user = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new RuntimeException("User not found"));
 
@@ -54,7 +55,8 @@ public class CardService {
         newCard.setExpiry(expiry);
         newCard.setCardAccount(account);
         account.setCardAccount(newCard);
-        return cardRepository.save(newCard);
+        cardRepository.save(newCard);
+        return new CardCreateResponseDto(newCard.getPan(), newCard.getCvv(), newCard.getExpiry());
 
     }
 }

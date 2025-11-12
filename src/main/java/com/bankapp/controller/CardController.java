@@ -1,5 +1,6 @@
 package com.bankapp.controller;
 
+import com.bankapp.dto.Card.CardCreateResponseDto;
 import com.bankapp.service.CardService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,8 +19,8 @@ public class CardController {
 
     @PostMapping("/card")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_BASIC')")
-    public ResponseEntity<Void> createCard(){
-        cardService.createCard();
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<CardCreateResponseDto> createCard(){
+        CardCreateResponseDto cardCreateResponseDto = cardService.createCard();
+        return ResponseEntity.ok(cardCreateResponseDto);
     }
 }
