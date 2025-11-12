@@ -9,35 +9,43 @@ Este projeto foi construído com foco em **boas práticas**, **segurança**, **m
 
 ## 🚀 Funcionalidades
 
-### 🔐 Autenticação e Autorização (JWT)
+## 🔐 Autenticação e Autorização (JWT)
 - Login e logout seguros.
-- Renovação automática do token.
 - Proteção de rotas sensíveis com **roles** e **authorities**.
 - Tokens com **tempo de expiração configurável**.
 
-### 👥 Gestão de Usuários
+## 👥 Gestão de Usuários
 - Cadastro e atualização de perfis.
 - Ativação e desativação de contas.
 - Paginação e ordenação configuráveis.
 - DTOs otimizados para respostas leves.
 
-### 💳 Gerenciamento de Contas Bancárias
+## 🪙 Gerenciamento de Contas Bancárias
 - Criação de conta quando o usuário desejar.
-- Geração **sequencial e única** de número de conta.
+- Geração sequencial e única de número de conta.
 - Visualização dos dados da conta do usuário autenticado.
 - Associação direta entre usuário e conta.
 
-### 💰 Operações Financeiras
-- Consulta de **saldo**.
-- Registro de **transferências** entre contas.
+## 💳 Cartões de Crédito e Faturas
+- Emissão de **cartão de crédito vinculado à conta bancária**.
+- Geração de número de cartão com **algoritmo de Luhn** para validação.
+- **Limite de crédito configurável** e controle de gastos.
+- **Faturas mensais automáticas**, com registro de compras e data de fechamento.
+- Pagamento total ou parcial da fatura diretamente pela conta.
+- Bloqueio e desbloqueio de cartão pelo usuário.
+- Histórico completo de compras e faturas anteriores.
+
+## 💰 Operações Financeiras
+- Consulta de saldo.
+- Registro de transferências entre contas.
 - Histórico de transações.
 - Regras de negócio com **validações automáticas** (ex: saldo insuficiente).
 
-### 📄 Listagens Customizadas e Paginadas
-- Suporte a **filtros dinâmicos** via *query params*.
+## 📄 Listagens Customizadas e Paginadas
+- Suporte a **filtros dinâmicos** via query params.
 - **Ordenação por múltiplos campos**.
 - **Paginação configurável** com respostas em DTOs otimizados.
-- Projeções para respostas mais rápidas.
+- **Projeções** para respostas mais rápidas e leves.
 
 ---
 

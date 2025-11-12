@@ -3,6 +3,7 @@ package com.bankapp.entity;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 
 @Entity
@@ -16,6 +17,10 @@ public class Card {
     private String pan;
     private String cvv;
     private String expiry;
+    private BigDecimal creditLimit;
+    private BigDecimal availableLimit;
+    private boolean isBlocked;
+
     @CreationTimestamp
     private Instant creationTimestamp;
 
@@ -69,5 +74,29 @@ public class Card {
 
     public void setCardAccount(Account cardAccount) {
         this.cardAccount = cardAccount;
+    }
+
+    public BigDecimal getCreditLimit() {
+        return creditLimit;
+    }
+
+    public void setCreditLimit(BigDecimal creditLimit) {
+        this.creditLimit = creditLimit;
+    }
+
+    public BigDecimal getAvailableLimit() {
+        return availableLimit;
+    }
+
+    public void setAvailableLimit(BigDecimal availableLimit) {
+        this.availableLimit = availableLimit;
+    }
+
+    public boolean isBlocked() {
+        return isBlocked;
+    }
+
+    public void setBlocked(boolean blocked) {
+        isBlocked = blocked;
     }
 }

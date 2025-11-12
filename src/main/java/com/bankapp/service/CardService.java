@@ -13,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
 import java.time.YearMonth;
 import java.util.Random;
 
@@ -54,6 +55,9 @@ public class CardService {
         newCard.setCvv(cvv);
         newCard.setExpiry(expiry);
         newCard.setCardAccount(account);
+        newCard.setBlocked(false);
+        newCard.setCreditLimit(BigDecimal.valueOf(1000));
+        newCard.setAvailableLimit(BigDecimal.valueOf(1000));
         account.setCardAccount(newCard);
         cardRepository.save(newCard);
         return new CardCreateResponseDto(newCard.getPan(), newCard.getCvv(), newCard.getExpiry());
