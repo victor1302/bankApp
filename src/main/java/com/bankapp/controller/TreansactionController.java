@@ -1,6 +1,7 @@
 package com.bankapp.controller;
 
 import com.bankapp.dto.Transaction.CreateTransactionDto;
+import com.bankapp.dto.Transaction.CreationTransactionResponseDto;
 import com.bankapp.interfaces.TransactionProjection;
 import com.bankapp.service.TransactionService;
 import org.springframework.data.domain.Page;
@@ -9,7 +10,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,9 +23,9 @@ public class TreansactionController {
 
     @PostMapping("/transaction")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_BASIC')")
-    public ResponseEntity<Void> createTransaction(JwtAuthenticationToken jwtAuthenticationToken, @RequestBody CreateTransactionDto createTransactionDto){
-        transactionService.createTransaction(jwtAuthenticationToken, createTransactionDto.destinationAccountId(), createTransactionDto.amount());
-        return ResponseEntity.status(HttpStatus.CREATED).build();
+    public ResponseEntity<CreationTransactionResponseDto> createTransaction(@RequestBody CreateTransactionDto createTransactionDto){
+        CreationTransactionResponseDto creationTransactionResponseDto = transactionService.createTransaction(createTransactionDto.destinationAccountId(),createTransactionDto.amount());
+        return ResponseEntity.ok(creationTransactionResponseDto);
     }
 
     @GetMapping("/transaction")

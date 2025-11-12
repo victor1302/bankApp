@@ -1,5 +1,6 @@
 package com.bankapp.service;
 
+import com.bankapp.dto.Transaction.CreationTransactionResponseDto;
 import com.bankapp.entity.Account;
 import com.bankapp.entity.Transaction;
 import com.bankapp.entity.User;
@@ -9,7 +10,7 @@ import com.bankapp.repository.TransactionRepository;
 import com.bankapp.repository.UserRepository;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -30,10 +31,16 @@ public class TransactionService {
     }
 
     @Transactional
-    public Transaction createTransaction(JwtAuthenticationToken jwtAuthenticationToken, Long destinationAccountId, BigDecimal amount){
-        UUID userId = UUID.fromString(jwtAuthenticationToken.getName());
-        User sourceUser = userRepository.findById(userId)
+    public CreationTransactionResponseDto createTransaction(Long destinationAccountId, BigDecimal amount){
+
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        //exception
+        user = userRepository.findByEmail(user.getEmail()).orElseThrow();
+
+
+        User sourceUser = userRepository.findByEmail(user.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found!"));
+
 
         Account sourceAccount = accountRepository.findById(sourceUser.getUserAccount().getAccountId())
                 .orElseThrow(() -> new RuntimeException("Source account not found!"));
@@ -41,8 +48,11 @@ public class TransactionService {
         Account destinationAccount = accountRepository.findById(destinationAccountId)
                 .orElseThrow(() -> new RuntimeException("Destination account not found!"));
 
+
         Transaction transaction = new Transaction();
-        if(sourceAccount.getBalance().compareTo(amount) < 0){
+
+
+        if(sourceAccount.getBalance().compareTo(amount) < 0 ){
             throw new RuntimeException("You don't have enough money");
         }
         transaction.setAmount(amount);
@@ -50,8 +60,11 @@ public class TransactionService {
         transaction.setDestinationAccount(destinationAccount);
         sourceAccount.setBalance(sourceAccount.getBalance().subtract(amount));
         destinationAccount.setBalance(destinationAccount.getBalance().add(amount));
+        transactionRepository.save(transaction);
 
-        return transactionRepository.save(transaction);
+        return new CreationTransactionResponseDto(sourceAccount.getUserAccount().getUsername(), sourceAccount.getAccountNumber(),
+                destinationAccount.getUserAccount().getUsername(), destinationAccount.getAccountNumber(),
+                amount, transaction.getTransactionId());
     }
 
     @Transactional
