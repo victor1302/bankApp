@@ -17,17 +17,13 @@ import java.util.List;
 @Service
 public class InvoiceService {
 
-    private final CardRepository cardRepository;
     private final InvoiceRepository invoiceRepository;
-    private final InstallmentRepository installmentRepository;
-    private final AccountRepository accountRepository;
     private final UserRepository userRepository;
+    private final CardRepository cardRepository;
 
-    public InvoiceService(CardRepository cardRepository, InvoiceRepository invoiceRepository, InstallmentRepository installmentRepository, AccountRepository accountRepository, UserRepository userRepository) {
-        this.cardRepository = cardRepository;
+    public InvoiceService(InvoiceRepository invoiceRepository, UserRepository userRepository, CardRepository cardRepository) {
         this.invoiceRepository = invoiceRepository;
-        this.installmentRepository = installmentRepository;
-        this.accountRepository = accountRepository;
+        this.cardRepository = cardRepository;
         this.userRepository = userRepository;
     }
 
@@ -36,17 +32,17 @@ public class InvoiceService {
 
         User sourceUser = userRepository.findByEmail(user.getEmail()).
                 orElseThrow();
-        Account userAccount = sourceUser.getUserAccount();
         Card userCard = sourceUser.getUserAccount().getCardAccount();
-
-        YearMonth yearMonth = YearMonth.now();
-        Invoice newInvoice = new Invoice();
-        newInvoice.setReferenceMonth(yearMonth);
 
         if(userCard.getAvailableLimit().compareTo(crateInvoiceRequestDto.totalAmount()) < 0
                 || crateInvoiceRequestDto.totalAmount().signum() < 0){
             throw new RuntimeException("You don't have sufficient limit available");
         }
+
+        YearMonth yearMonth = YearMonth.now();
+        Invoice newInvoice = new Invoice();
+        newInvoice.setReferenceMonth(yearMonth);
+
 
         newInvoice.setTotalAmount(crateInvoiceRequestDto.totalAmount());
         newInvoice.setAmountPaid(BigDecimal.ZERO);
@@ -57,6 +53,13 @@ public class InvoiceService {
         newInvoice.setCreditCard(userCard);
         newInvoice.setInstallments(createInstallment(crateInvoiceRequestDto.totalAmount(),LocalDateTime.now(),crateInvoiceRequestDto.installmentCount(),
                 newInvoice));
+
+        if(userCard.getCardInvoice() == null){
+            userCard.setCardInvoice(new ArrayList<>());
+        }
+        userCard.getCardInvoice().add(newInvoice);
+        userCard.setCreditLimit(userCard.getAvailableLimit().subtract(crateInvoiceRequestDto.totalAmount()));
+        cardRepository.save(userCard);
 
         invoiceRepository.save(newInvoice);
         return new CreateInvoiceResponseDto(newInvoice.getTotalAmount(), newInvoice.getInstallmentCount(), newInvoice.getDescription());

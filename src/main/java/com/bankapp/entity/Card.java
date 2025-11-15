@@ -104,4 +104,12 @@ public class Card {
     public void setBlocked(boolean blocked) {
         isBlocked = blocked;
     }
+
+    public List<Invoice> getCardInvoice() {
+        return cardInvoice;
+    }
+
+    public void setCardInvoice(List<Invoice> cardInvoice) {
+        this.cardInvoice = cardInvoice;
+    }
 }
