@@ -42,6 +42,12 @@ public class InvoiceService {
         YearMonth yearMonth = YearMonth.now();
         Invoice newInvoice = new Invoice();
         newInvoice.setReferenceMonth(yearMonth);
+
+        if(userCard.getAvailableLimit().compareTo(crateInvoiceRequestDto.totalAmount()) < 0
+                || crateInvoiceRequestDto.totalAmount().signum() < 0){
+            throw new RuntimeException("You don't have sufficient limit available");
+        }
+
         newInvoice.setTotalAmount(crateInvoiceRequestDto.totalAmount());
         newInvoice.setAmountPaid(BigDecimal.ZERO);
         newInvoice.setInstallmentCount(crateInvoiceRequestDto.installmentCount());
