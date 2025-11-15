@@ -15,6 +15,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.UUID;
 
 @Service
@@ -48,7 +49,7 @@ public class TransactionService {
         Transaction transaction = new Transaction();
 
 
-        if(sourceAccount.getBalance().compareTo(amount) < 0){
+        if(sourceAccount.getBalance().compareTo(amount) < 0 || amount.signum() < 0){
             throw new RuntimeException("You don't have enough money");
         }
         if(sourceAccount == destinationAccount){
