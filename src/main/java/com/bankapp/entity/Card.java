@@ -29,7 +29,7 @@ public class Card {
     @CreationTimestamp
     private Instant creationTimestamp;
 
-    @OneToOne(mappedBy = "cardAccount", cascade = CascadeType.PERSIST, fetch = FetchType.LAZY)
+    @OneToOne(mappedBy = "cardAccount", cascade = CascadeType.PERSIST)
     private Account cardAccount;
 
     public Long getCardId() {

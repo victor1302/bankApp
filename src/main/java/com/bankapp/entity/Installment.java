@@ -70,4 +70,12 @@ public class Installment{
     public void setInvoice(Invoice invoice) {
         this.invoice = invoice;
     }
+
+    public LocalDateTime getPaymentDate() {
+        return paymentDate;
+    }
+
+    public void setPaymentDate(LocalDateTime paymentDate) {
+        this.paymentDate = paymentDate;
+    }
 }

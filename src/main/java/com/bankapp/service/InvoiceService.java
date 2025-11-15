@@ -6,6 +6,7 @@ import com.bankapp.entity.*;
 import com.bankapp.repository.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
@@ -27,6 +28,7 @@ public class InvoiceService {
         this.userRepository = userRepository;
     }
 
+    @Transactional
     public CreateInvoiceResponseDto createInvoice(CrateInvoiceRequestDto crateInvoiceRequestDto){
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
@@ -58,7 +60,7 @@ public class InvoiceService {
             userCard.setCardInvoice(new ArrayList<>());
         }
         userCard.getCardInvoice().add(newInvoice);
-        userCard.setCreditLimit(userCard.getAvailableLimit().subtract(crateInvoiceRequestDto.totalAmount()));
+        userCard.setAvailableLimit(userCard.getAvailableLimit().subtract(crateInvoiceRequestDto.totalAmount()));
         cardRepository.save(userCard);
 
         invoiceRepository.save(newInvoice);
@@ -80,10 +82,6 @@ public class InvoiceService {
         }
         return listInstallment;
     }
-
-
-
-
 
 
 }
