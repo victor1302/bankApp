@@ -32,6 +32,7 @@ public class User {
     private String username;
     private String phoneNumber;
     private String address;
+    @Column(unique = true)
     private String email;
     private boolean isActive;
     @CreationTimestamp
