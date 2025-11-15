@@ -8,6 +8,7 @@ import com.bankapp.interfaces.TransactionProjection;
 import com.bankapp.repository.AccountRepository;
 import com.bankapp.repository.TransactionRepository;
 import com.bankapp.repository.UserRepository;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -46,6 +47,17 @@ public class TransactionService {
         Account destinationAccount = accountRepository.findById(destinationAccountId)
                 .orElseThrow(() -> new RuntimeException("Destination account not found!"));
 
+        Transaction transaction = getTransaction(amount, sourceAccount, destinationAccount);
+        sourceAccount.setBalance(sourceAccount.getBalance().subtract(amount));
+        destinationAccount.setBalance(destinationAccount.getBalance().add(amount));
+        transactionRepository.save(transaction);
+
+        return new CreationTransactionResponseDto(sourceAccount.getUserAccount().getUsername(), sourceAccount.getAccountNumber(),
+                destinationAccount.getUserAccount().getUsername(), destinationAccount.getAccountNumber(),
+                amount, transaction.getTransactionId());
+    }
+
+    private Transaction getTransaction(@NotNull BigDecimal amount, @NotNull Account sourceAccount, @NotNull Account destinationAccount) {
         Transaction transaction = new Transaction();
 
 
@@ -58,14 +70,10 @@ public class TransactionService {
         transaction.setAmount(amount);
         transaction.setSourceAccount(sourceAccount);
         transaction.setDestinationAccount(destinationAccount);
-        sourceAccount.setBalance(sourceAccount.getBalance().subtract(amount));
-        destinationAccount.setBalance(destinationAccount.getBalance().add(amount));
-        transactionRepository.save(transaction);
-
-        return new CreationTransactionResponseDto(sourceAccount.getUserAccount().getUsername(), sourceAccount.getAccountNumber(),
-                destinationAccount.getUserAccount().getUsername(), destinationAccount.getAccountNumber(),
-                amount, transaction.getTransactionId());
+        return transaction;
     }
+    
+    
 
     @Transactional
     public Page<TransactionProjection> getTransactions(Pageable pageable){
