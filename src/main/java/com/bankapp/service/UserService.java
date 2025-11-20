@@ -4,8 +4,8 @@ import com.bankapp.dto.User.LoginRequestDto;
 import com.bankapp.dto.User.LoginResponseDto;
 import com.bankapp.entity.Role;
 import com.bankapp.entity.User;
-import com.bankapp.exception.UserAlreadyExistsException;
-import com.bankapp.exception.UserAlreadyIsDisableOrNotPresent;
+import com.bankapp.exception.AlreadyExistsException;
+import com.bankapp.exception.AlreadyDisabledOrNotPresent;
 import com.bankapp.interfaces.UserProjection;
 import com.bankapp.repository.RoleRepository;
 import com.bankapp.repository.UserRepository;
@@ -16,7 +16,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -38,6 +37,9 @@ public class UserService {
 
     public LoginResponseDto loginUser(LoginRequestDto loginRequestDto){
         User user = this.userRepository.findByEmail(loginRequestDto.email()).orElseThrow(() -> new RuntimeException("Credentials Invalid"));
+        if(!user.isActive()){
+            throw new AlreadyExistsException("User is disabled or not exists");
+        }
         if(passwordEncoder.matches(loginRequestDto.password(), user.getPassword())){
             String token = this.tokenService.generateToken(user);
             return new LoginResponseDto(user.getEmail(), token);
@@ -51,7 +53,7 @@ public class UserService {
         var basicRole = roleRepository.findByName(Role.Values.BASIC.name());
 
         if(userRepository.existsByUsername(username)){
-            throw new UserAlreadyExistsException("User already exists!");
+            throw new AlreadyExistsException("User already exists!");
         }
         User user = new User();
         user.setUsername(username);
@@ -72,13 +74,13 @@ public class UserService {
     public User disableUser(UUID userId){
         return userRepository.findById(userId)
                 .map(user ->{
-                    if(!user.isActive()){
-                        throw new UserAlreadyIsDisableOrNotPresent("User not present or already exists");
+                    if(!user.isActive() || user.getUserAccount().isActive()){
+                        throw new AlreadyDisabledOrNotPresent("User not present or already disabled or have an active account");
                     }
                     user.setActive(false);
                     return userRepository.save(user);
                 })
-                .orElseThrow(()-> new UserAlreadyExistsException("User not present or already exists"));
+                .orElseThrow(()-> new AlreadyDisabledOrNotPresent("User not present or already disabled"));
     }
 
 

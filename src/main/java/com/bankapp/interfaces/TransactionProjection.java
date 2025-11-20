@@ -1,6 +1,5 @@
 package com.bankapp.interfaces;
 
-import com.bankapp.entity.Account;
 
 import java.math.BigDecimal;
 import java.time.Instant;

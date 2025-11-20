@@ -3,15 +3,14 @@ package com.bankapp.service;
 import com.bankapp.dto.Account.CreateAccountResponseDto;
 import com.bankapp.entity.Account;
 import com.bankapp.entity.User;
+import com.bankapp.exception.AlreadyDisabledOrNotPresent;
+import com.bankapp.exception.AlreadyExistsException;
 import com.bankapp.repository.AccountRepository;
 import com.bankapp.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
 import java.math.BigDecimal;
-import java.util.UUID;
 
 @Service
 public class AccountService {
@@ -32,14 +31,24 @@ public class AccountService {
 
         Integer lastAccountNumber = accountRepository.findMaxAccountNumber();
         int newAccountNumber = (lastAccountNumber != null) ? lastAccountNumber + 1 : 1;
-
         Account newAccount = new Account();
         newAccount.setUserAccount(user);
         newAccount.setBalance(BigDecimal.valueOf(0));
         newAccount.setAccountNumber(newAccountNumber);
+        newAccount.setActive(true);
         user.setUserAccount(newAccount);
-
         return new CreateAccountResponseDto(newAccount.getAccountNumber(), newAccount.getBalance());
+    }
+    @Transactional
+    public Account disableAccount(Long accountId){
+        return accountRepository.findById(accountId)
+                .map(account ->{
+                    if(!account.isActive()){
+                        throw new AlreadyDisabledOrNotPresent("Account already disabled or not present");
+                    }
+                    account.setActive(false);
+                    return accountRepository.save(account);
+                }).orElseThrow(()-> new AlreadyExistsException("Account not present or already exists"));
     }
 
 }

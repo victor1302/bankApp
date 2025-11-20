@@ -4,6 +4,9 @@ import com.bankapp.dto.Transaction.CreationTransactionResponseDto;
 import com.bankapp.entity.Account;
 import com.bankapp.entity.Transaction;
 import com.bankapp.entity.User;
+import com.bankapp.exception.AlreadyDisabledOrNotPresent;
+import com.bankapp.exception.AlreadyExistsException;
+import com.bankapp.exception.UserOrAccountDisabled;
 import com.bankapp.interfaces.TransactionProjection;
 import com.bankapp.repository.AccountRepository;
 import com.bankapp.repository.TransactionRepository;
@@ -40,12 +43,18 @@ public class TransactionService {
         User sourceUser = userRepository.findByEmail(user.getEmail())
                 .orElseThrow(() -> new RuntimeException("User not found!"));
 
-
         Account sourceAccount = accountRepository.findById(sourceUser.getUserAccount().getAccountId())
                 .orElseThrow(() -> new RuntimeException("Source account not found!"));
 
         Account destinationAccount = accountRepository.findById(destinationAccountId)
                 .orElseThrow(() -> new RuntimeException("Destination account not found!"));
+
+        if(!sourceAccount.isActive() || !destinationAccount.isActive()){
+            throw new UserOrAccountDisabled("Source or destination account do not exists or disabled");
+        }
+        if(!sourceUser.isActive()){
+            throw new UserOrAccountDisabled("Source user do not exists or disabled");
+        }
 
         Transaction transaction = getTransaction(amount, sourceAccount, destinationAccount);
         sourceAccount.setBalance(sourceAccount.getBalance().subtract(amount));

@@ -9,11 +9,9 @@ import com.bankapp.repository.UserRepository;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Component
@@ -71,6 +69,7 @@ public class DataInitializer implements CommandLineRunner {
                     account.setUserAccount(user);
                     account.setBalance(BigDecimal.valueOf(999999999));
                     account.setAccountNumber(0);
+                    account.setActive(true);
                     user.setUserAccount(account);
                     userRepository.save(user);
                     accountRepository.save(account);

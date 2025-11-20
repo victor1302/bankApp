@@ -16,6 +16,7 @@ public class Account {
     private Long accountId;
     private int accountNumber;
     private BigDecimal balance;
+    private boolean isActive;
     @CreationTimestamp
     private Instant creationTimestamp;
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
@@ -53,6 +54,14 @@ public class Account {
 
     public User getUserAccount() {
         return userAccount;
+    }
+
+    public boolean isActive() {
+        return isActive;
+    }
+
+    public void setActive(boolean active) {
+        isActive = active;
     }
 
     public void setUserAccount(User userAccount) {

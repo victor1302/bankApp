@@ -9,16 +9,20 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 
 public class GlobalExceptionHandler{
 
-    @ExceptionHandler(UserAlreadyExistsException.class)
-    public ResponseEntity<String> handleUserAlreadyExistsException(UserAlreadyExistsException ex){
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+    @ExceptionHandler(AlreadyExistsException.class)
+    public ResponseEntity<String> handleUserAlreadyExistsException(AlreadyExistsException ex){
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
     @ExceptionHandler(BadCredentialException.class)
     public ResponseEntity<String> handleBadCredentialException(BadCredentialException ex){
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(ex.getMessage());
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
-    @ExceptionHandler(UserAlreadyIsDisableOrNotPresent.class)
-    public ResponseEntity<String> handleUserAlreadyIsDisableOrNotPresent(UserAlreadyIsDisableOrNotPresent ex){
-        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(ex.getMessage());
+    @ExceptionHandler(AlreadyDisabledOrNotPresent.class)
+    public ResponseEntity<String> handleUserAlreadyIsDisableOrNotPresent(AlreadyDisabledOrNotPresent ex){
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
+    }
+    @ExceptionHandler(UserOrAccountDisabled.class)
+    public ResponseEntity<String> handleUserOrAccountDisabled(UserOrAccountDisabled ex){
+        return ResponseEntity.status(HttpStatus.FORBIDDEN).body(ex.getMessage());
     }
 }
