@@ -32,7 +32,7 @@ public class Invoice {
     @JoinColumn(name = "card_id", nullable = false)
     private Card creditCard;
 
-    @OneToMany(mappedBy = "installmentId", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Installment> installments = new ArrayList<>();
 
     public enum InvoiceStatus{
