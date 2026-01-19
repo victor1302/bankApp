@@ -47,6 +47,7 @@ public class InstallmentService {
 
         Card cardUser = sourceUser.getUserAccount().getCardAccount();
 
+
         if(!(sourceUser.getUserAccount().getCardAccount().getCardId().equals(invoice.getCreditCard().getCardId()))){
             throw new RuntimeException("You cant pay others installments");
         }
@@ -54,20 +55,25 @@ public class InstallmentService {
         if(sourceUser.getUserAccount().getBalance().compareTo(installmentToPay.getAmount()) < 0){
             throw new RuntimeException("You don't have money to pay this installment");
         }
+        if (!installmentToPay.getInvoice().getInvoiceId().equals(invoice.getInvoiceId())) {
+            throw new RuntimeException("Installment does not belong to this invoice");
+        }
         if(installmentToPay.isPaid()){
             throw new RuntimeException("Installment is already paid!");
         }
+        if(installmentToPay.getInstallmentNumber() == invoice.getInstallmentCount()){
+            invoice.setStatus(Invoice.InvoiceStatus.PAID);
+        }
+        sourceUser.getUserAccount().setBalance(sourceUser.getUserAccount().getBalance().subtract(installmentToPay.getAmount()));
         installmentToPay.setPaid(true);
         installmentToPay.setPaymentDate(LocalDateTime.now());
-        installmentRepository.save(installmentToPay);
-
         invoice.setAmountPaid(invoice.getAmountPaid().add(installmentToPay.getAmount()));
         invoice.setUpdatedAt(Instant.now());
-        invoiceRepository.save(invoice);
-
         cardUser.setAvailableLimit(cardUser.getAvailableLimit().add(installmentToPay.getAmount()));
-        cardRepository.save(cardUser);
+
+
 
         return new PayInstallmentResponseDto(true);
     }
+
 }
