@@ -51,7 +51,7 @@ public class InvoiceService {
         newInvoice.setInstallmentCount(crateInvoiceRequestDto.installmentCount());
         newInvoice.setStatus(Invoice.InvoiceStatus.OPEN);
         newInvoice.setDescription(crateInvoiceRequestDto.description());
-        newInvoice.setClosingDate(yearMonth.plus(Period.ofYears(crateInvoiceRequestDto.installmentCount())));
+        newInvoice.setClosingDate(yearMonth.plusMonths(crateInvoiceRequestDto.installmentCount()));
         newInvoice.setCreditCard(userCard);
         newInvoice.setInstallments(createInstallment(crateInvoiceRequestDto.totalAmount(),LocalDateTime.now(),crateInvoiceRequestDto.installmentCount(),
                 newInvoice));
@@ -62,8 +62,6 @@ public class InvoiceService {
         userCard.getCardInvoice().add(newInvoice);
         userCard.setAvailableLimit(userCard.getAvailableLimit().subtract(crateInvoiceRequestDto.totalAmount()));
         cardRepository.save(userCard);
-
-        invoiceRepository.save(newInvoice);
         return new CreateInvoiceResponseDto(newInvoice.getTotalAmount(), newInvoice.getInstallmentCount(), newInvoice.getDescription());
     }
 
