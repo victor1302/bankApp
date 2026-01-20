@@ -15,7 +15,7 @@ public class Account {
     @Column(name = "account_id")
     private Long accountId;
     private int accountNumber;
-    private BigDecimal balance;
+    private BigDecimal cachedBalance;
     private boolean isActive;
     @CreationTimestamp
     private Instant creationTimestamp;
@@ -44,12 +44,12 @@ public class Account {
         this.accountNumber = accountNumber;
     }
 
-    public BigDecimal getBalance() {
-        return balance;
+    public BigDecimal getCachedBalance() {
+        return cachedBalance;
     }
 
-    public void setBalance(BigDecimal balance) {
-        this.balance = balance;
+    public void setCachedBalance(BigDecimal cachedBalance) {
+        this.cachedBalance = cachedBalance;
     }
 
     public User getUserAccount() {
