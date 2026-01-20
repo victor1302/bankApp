@@ -22,11 +22,18 @@ public class Account {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", unique = true)
     private User userAccount;
-
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "card_id", unique = true)
     private Card cardAccount;
+    @Enumerated(EnumType.STRING)
+    private AccountType accountType;
 
+    enum AccountType{
+        USER,
+        MARKETPLACE,
+        SELLER,
+        ESCROW
+    }
 
     public Long getAccountId() {
         return accountId;
