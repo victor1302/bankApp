@@ -57,8 +57,8 @@ public class TransactionService {
         }
 
         Transaction transaction = getTransaction(amount, sourceAccount, destinationAccount);
-        sourceAccount.setBalance(sourceAccount.getBalance().subtract(amount));
-        destinationAccount.setBalance(destinationAccount.getBalance().add(amount));
+        sourceAccount.setCachedBalance(sourceAccount.getCachedBalance().subtract(amount));
+        destinationAccount.setCachedBalance(destinationAccount.getCachedBalance().add(amount));
         transactionRepository.save(transaction);
 
         return new CreationTransactionResponseDto(sourceAccount.getUserAccount().getUsername(), sourceAccount.getAccountNumber(),
@@ -70,7 +70,7 @@ public class TransactionService {
         Transaction transaction = new Transaction();
 
 
-        if(sourceAccount.getBalance().compareTo(amount) < 0 || amount.signum() < 0){
+        if(sourceAccount.getCachedBalance().compareTo(amount) < 0 || amount.signum() < 0){
             throw new RuntimeException("You don't have enough money");
         }
         if(sourceAccount == destinationAccount){

@@ -33,11 +33,11 @@ public class AccountService {
         int newAccountNumber = (lastAccountNumber != null) ? lastAccountNumber + 1 : 1;
         Account newAccount = new Account();
         newAccount.setUserAccount(user);
-        newAccount.setBalance(BigDecimal.valueOf(0));
+        newAccount.setCachedBalance(BigDecimal.valueOf(0));
         newAccount.setAccountNumber(newAccountNumber);
         newAccount.setActive(true);
         user.setUserAccount(newAccount);
-        return new CreateAccountResponseDto(newAccount.getAccountNumber(), newAccount.getBalance());
+        return new CreateAccountResponseDto(newAccount.getAccountNumber(), newAccount.getCachedBalance());
     }
     @Transactional
     public Account disableAccount(Long accountId){

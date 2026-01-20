@@ -52,7 +52,7 @@ public class InstallmentService {
             throw new RuntimeException("You cant pay others installments");
         }
 
-        if(sourceUser.getUserAccount().getBalance().compareTo(installmentToPay.getAmount()) < 0){
+        if(sourceUser.getUserAccount().getCachedBalance().compareTo(installmentToPay.getAmount()) < 0){
             throw new RuntimeException("You don't have money to pay this installment");
         }
         if (!installmentToPay.getInvoice().getInvoiceId().equals(invoice.getInvoiceId())) {
@@ -64,7 +64,7 @@ public class InstallmentService {
         if(installmentToPay.getInstallmentNumber() == invoice.getInstallmentCount()){
             invoice.setStatus(Invoice.InvoiceStatus.PAID);
         }
-        sourceUser.getUserAccount().setBalance(sourceUser.getUserAccount().getBalance().subtract(installmentToPay.getAmount()));
+        sourceUser.getUserAccount().setCachedBalance(sourceUser.getUserAccount().getCachedBalance().subtract(installmentToPay.getAmount()));
         installmentToPay.setPaid(true);
         installmentToPay.setPaymentDate(LocalDateTime.now());
         invoice.setAmountPaid(invoice.getAmountPaid().add(installmentToPay.getAmount()));
