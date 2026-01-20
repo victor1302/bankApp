@@ -28,15 +28,9 @@ public class AccountService {
     public CreateAccountResponseDto createAccount(){
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         user = userRepository.findByEmail(user.getEmail()).orElseThrow();
-
         Integer lastAccountNumber = accountRepository.findMaxAccountNumber();
         int newAccountNumber = (lastAccountNumber != null) ? lastAccountNumber + 1 : 1;
-        Account newAccount = new Account();
-        newAccount.setUserAccount(user);
-        newAccount.setCachedBalance(BigDecimal.valueOf(0));
-        newAccount.setAccountNumber(newAccountNumber);
-        newAccount.setActive(true);
-        user.setUserAccount(newAccount);
+        Account newAccount = new Account(user, newAccountNumber);
         return new CreateAccountResponseDto(newAccount.getAccountNumber(), newAccount.getCachedBalance());
     }
     @Transactional

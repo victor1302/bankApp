@@ -28,12 +28,24 @@ public class Account {
     @Enumerated(EnumType.STRING)
     private AccountType accountType;
 
-    enum AccountType{
+    protected Account() {
+
+    }
+
+    enum AccountType {
         USER,
         MARKETPLACE,
         SELLER,
         ESCROW
     }
+    public Account(User userAccount, int accountNumber){
+        this.accountType = AccountType.USER;
+        this.userAccount = userAccount;
+        this.accountNumber = accountNumber;
+        this.cachedBalance = BigDecimal.ZERO;
+        this.isActive = true;
+    }
+
 
     public Long getAccountId() {
         return accountId;

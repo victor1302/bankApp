@@ -65,7 +65,7 @@ public class DataInitializer implements CommandLineRunner {
                     user.setAge(99);
                     user.setUserRole(Set.of(adminRole));
 
-                    var account = new Account();
+                    var account = new Account(user, 0);
                     account.setUserAccount(user);
                     account.setCachedBalance(BigDecimal.valueOf(999999999));
                     account.setAccountNumber(0);
