@@ -31,6 +31,7 @@ public class AccountService {
         Integer lastAccountNumber = accountRepository.findMaxAccountNumber();
         int newAccountNumber = (lastAccountNumber != null) ? lastAccountNumber + 1 : 1;
         Account newAccount = new Account(user, newAccountNumber);
+        user.setUserAccount(newAccount);
         return new CreateAccountResponseDto(newAccount.getAccountNumber(), newAccount.getCachedBalance());
     }
     @Transactional

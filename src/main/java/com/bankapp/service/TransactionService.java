@@ -1,9 +1,12 @@
 package com.bankapp.service;
 
+import com.bankapp.dto.LedgerEntry.Debit.DebitResponseDto;
+import com.bankapp.dto.Transaction.CreateTransactionDto;
 import com.bankapp.dto.Transaction.CreationTransactionResponseDto;
 import com.bankapp.entity.Account;
 import com.bankapp.entity.Transaction;
 import com.bankapp.entity.User;
+import com.bankapp.exception.AccountDontHaveEnoughMoney;
 import com.bankapp.exception.AlreadyDisabledOrNotPresent;
 import com.bankapp.exception.AlreadyExistsException;
 import com.bankapp.exception.UserOrAccountDisabled;
@@ -28,16 +31,33 @@ public class TransactionService {
     private final TransactionRepository transactionRepository;
     private final AccountRepository accountRepository;
     private final UserRepository userRepository;
+    private final LedgerService ledgerService;
 
-    public TransactionService(TransactionRepository transactionRepository, UserRepository userRepository, AccountRepository accountRepository) {
+    public TransactionService(TransactionRepository transactionRepository, UserRepository userRepository, AccountRepository accountRepository, LedgerService ledgerService) {
         this.transactionRepository = transactionRepository;
         this.userRepository = userRepository;
         this.accountRepository = accountRepository;
+        this.ledgerService = ledgerService;
     }
 
     @Transactional
-    public CreationTransactionResponseDto createTransaction(Long destinationAccountId, BigDecimal amount){
+    public CreationTransactionResponseDto createDebitTransaction(CreateTransactionDto createTransactionDto){
 
+
+        Transaction transaction = createAndSaveTransaction(createTransactionDto);
+        DebitResponseDto debitResponseDto = ledgerService.createTransferEntries(transaction);
+
+
+        return new CreationTransactionResponseDto(
+                transaction.getTransactionId(),
+                debitResponseDto
+        );
+
+
+    }
+
+
+    public Transaction createAndSaveTransaction(CreateTransactionDto createTransactionDto){
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         User sourceUser = userRepository.findByEmail(user.getEmail())
@@ -46,8 +66,13 @@ public class TransactionService {
         Account sourceAccount = accountRepository.findById(sourceUser.getUserAccount().getAccountId())
                 .orElseThrow(() -> new RuntimeException("Source account not found!"));
 
-        Account destinationAccount = accountRepository.findById(destinationAccountId)
+        Account destinationAccount = accountRepository.findById(createTransactionDto.destinationAccountId())
                 .orElseThrow(() -> new RuntimeException("Destination account not found!"));
+
+
+        if(sourceAccount.getCachedBalance().compareTo(createTransactionDto.amount()) < 0){
+            throw new AccountDontHaveEnoughMoney("Account dont have enough money!");
+        }
 
         if(!sourceAccount.isActive() || !destinationAccount.isActive()){
             throw new UserOrAccountDisabled("Source or destination account do not exists or disabled");
@@ -55,33 +80,14 @@ public class TransactionService {
         if(!sourceUser.isActive()){
             throw new UserOrAccountDisabled("Source user do not exists or disabled");
         }
+        Transaction newTransaction = new Transaction();
+        newTransaction.setDestinationAccount(destinationAccount);
+        newTransaction.setSourceAccount(sourceAccount);
+        newTransaction.setAmount(createTransactionDto.amount());
 
-        Transaction transaction = getTransaction(amount, sourceAccount, destinationAccount);
-        sourceAccount.setCachedBalance(sourceAccount.getCachedBalance().subtract(amount));
-        destinationAccount.setCachedBalance(destinationAccount.getCachedBalance().add(amount));
-        transactionRepository.save(transaction);
-
-        return new CreationTransactionResponseDto(sourceAccount.getUserAccount().getUsername(), sourceAccount.getAccountNumber(),
-                destinationAccount.getUserAccount().getUsername(), destinationAccount.getAccountNumber(),
-                amount, transaction.getTransactionId());
+        transactionRepository.save(newTransaction);
+        return newTransaction;
     }
-
-    private Transaction getTransaction(@NotNull BigDecimal amount, @NotNull Account sourceAccount, @NotNull Account destinationAccount) {
-        Transaction transaction = new Transaction();
-
-
-        if(sourceAccount.getCachedBalance().compareTo(amount) < 0 || amount.signum() < 0){
-            throw new RuntimeException("You don't have enough money");
-        }
-        if(sourceAccount == destinationAccount){
-            throw new RuntimeException("You can't make a transaction to yourself");
-        }
-        transaction.setAmount(amount);
-        transaction.setSourceAccount(sourceAccount);
-        transaction.setDestinationAccount(destinationAccount);
-        return transaction;
-    }
-    
     
 
     @Transactional

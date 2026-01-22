@@ -1,7 +1,7 @@
 package com.bankapp.dto.Transaction;
 
-import java.math.BigDecimal;
 
-public record CreationTransactionResponseDto(String sourceUsername, int sourceAccountNumber, String destinationUsername, int destinationAccountNumber,
-                                             BigDecimal amount, Long transactionId) {
+import com.bankapp.dto.LedgerEntry.Debit.DebitResponseDto;
+
+public record CreationTransactionResponseDto(Long transactionId, DebitResponseDto debitResponseDto) {
 }

@@ -1,5 +1,6 @@
 package com.bankapp.entity;
 
+import com.bankapp.entity.enums.AccountType;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -32,12 +33,6 @@ public class Account {
 
     }
 
-    enum AccountType {
-        USER,
-        MARKETPLACE,
-        SELLER,
-        ESCROW
-    }
     public Account(User userAccount, int accountNumber){
         this.accountType = AccountType.USER;
         this.userAccount = userAccount;
