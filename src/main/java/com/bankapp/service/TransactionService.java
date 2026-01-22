@@ -41,16 +41,15 @@ public class TransactionService {
     }
 
     @Transactional
-    public CreationTransactionResponseDto createDebitTransaction(CreateTransactionDto createTransactionDto){
-
+    public CreationTransactionResponseDto createPixTransaction(CreateTransactionDto createTransactionDto){
 
         Transaction transaction = createAndSaveTransaction(createTransactionDto);
-        DebitResponseDto debitResponseDto = ledgerService.createTransferEntries(transaction);
+        DebitResponseDto transferStatus = ledgerService.createTransferEntries(transaction);
 
 
         return new CreationTransactionResponseDto(
                 transaction.getTransactionId(),
-                debitResponseDto
+                transferStatus
         );
 
 

@@ -24,7 +24,7 @@ public class TreansactionController {
     @PostMapping("/transactions")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_BASIC')")
     public ResponseEntity<CreationTransactionResponseDto> createTransaction(@RequestBody CreateTransactionDto createTransactionDto){
-        CreationTransactionResponseDto creationTransactionResponseDto = transactionService.createDebitTransaction(createTransactionDto);
+        CreationTransactionResponseDto creationTransactionResponseDto = transactionService.createPixTransaction(createTransactionDto);
         return ResponseEntity.ok(creationTransactionResponseDto);
     }
 
