@@ -4,6 +4,7 @@ import com.bankapp.dto.LedgerEntry.Transfer.TransferResonseDto;
 import com.bankapp.dto.Transaction.CreateTransactionDto;
 import com.bankapp.dto.Transaction.CreateTransactionResponseDto;
 import com.bankapp.entity.*;
+import com.bankapp.entity.enums.TransactionStatus;
 import com.bankapp.exception.AccountDontHaveEnoughMoney;
 import com.bankapp.exception.UserOrAccountDisabled;
 import com.bankapp.interfaces.TransactionProjection;
@@ -15,6 +16,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.math.BigDecimal;
 
 @Service
 public class TransactionService {
@@ -60,6 +63,12 @@ public class TransactionService {
         if(sourceAccount.getCachedBalance().compareTo(createTransactionDto.amount()) < 0){
             throw new AccountDontHaveEnoughMoney("Account dont have enough money!");
         }
+        if(createTransactionDto.amount().equals(BigDecimal.ZERO)){
+            throw new RuntimeException("You cant send $0");
+        }
+        if(sourceAccount == destinationAccount){
+            throw new RuntimeException("You can't send money to yourself");
+        }
 
         if(!sourceAccount.isActive() || !destinationAccount.isActive()){
             throw new UserOrAccountDisabled("Source or destination account do not exists or disabled");
@@ -70,6 +79,7 @@ public class TransactionService {
         Transaction newTransaction = new Transaction();
         newTransaction.setDestinationAccount(destinationAccount);
         newTransaction.setSourceAccount(sourceAccount);
+        newTransaction.setStatus(TransactionStatus.COMPLETED);
         newTransaction.setAmount(createTransactionDto.amount());
 
         transactionRepository.save(newTransaction);

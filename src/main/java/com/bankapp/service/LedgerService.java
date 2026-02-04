@@ -24,6 +24,7 @@ public class LedgerService {
 
     @Transactional
     public TransferResonseDto createTransferEntries(Transaction transaction) {
+        updateCachedBalance(transaction);
         createLedgerEntry(
                 transaction.getSourceAccount().getAccountId(),
                 transaction.getAmount(),
@@ -33,15 +34,13 @@ public class LedgerService {
                 "Pix"
         );
         createLedgerEntry(
-                transaction.getSourceAccount().getAccountId(),
+                transaction.getDestinationAccount().getAccountId(),
                 transaction.getAmount(),
                 EntryType.CREDIT,
                 ReferenceType.TRANSFER,
                 transaction.getTransactionId(),
                 "Pix"
         );
-        updateCachedBalance(transaction);
-
         return new TransferResonseDto(
                 transaction.getTransactionId(),
                 transaction.getAmount(),
