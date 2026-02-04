@@ -1,5 +1,6 @@
 package com.bankapp.entity;
 
+import com.bankapp.entity.enums.TransactionStatus;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -21,6 +22,8 @@ public class Transaction {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "destination_account_id")
     private Account destinationAccount;
+    @Enumerated(EnumType.STRING)
+    private TransactionStatus status;
     private BigDecimal amount;
 
     public long getTransactionId() {
@@ -63,4 +66,15 @@ public class Transaction {
         this.destinationAccount = destinationAccount;
     }
 
+    public void setTransactionId(Long transactionId) {
+        this.transactionId = transactionId;
+    }
+
+    public TransactionStatus getStatus() {
+        return status;
+    }
+
+    public void setStatus(TransactionStatus status) {
+        this.status = status;
+    }
 }

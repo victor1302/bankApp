@@ -1,29 +1,20 @@
 package com.bankapp.service;
 
-import com.bankapp.dto.LedgerEntry.Debit.DebitResponseDto;
+import com.bankapp.dto.LedgerEntry.Transfer.TransferResonseDto;
 import com.bankapp.dto.Transaction.CreateTransactionDto;
-import com.bankapp.dto.Transaction.CreationTransactionResponseDto;
-import com.bankapp.entity.Account;
-import com.bankapp.entity.Transaction;
-import com.bankapp.entity.User;
+import com.bankapp.dto.Transaction.CreateTransactionResponseDto;
+import com.bankapp.entity.*;
 import com.bankapp.exception.AccountDontHaveEnoughMoney;
-import com.bankapp.exception.AlreadyDisabledOrNotPresent;
-import com.bankapp.exception.AlreadyExistsException;
 import com.bankapp.exception.UserOrAccountDisabled;
 import com.bankapp.interfaces.TransactionProjection;
 import com.bankapp.repository.AccountRepository;
 import com.bankapp.repository.TransactionRepository;
 import com.bankapp.repository.UserRepository;
-import jakarta.validation.constraints.NotNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.math.BigDecimal;
-import java.time.Instant;
-import java.util.UUID;
 
 @Service
 public class TransactionService {
@@ -41,18 +32,15 @@ public class TransactionService {
     }
 
     @Transactional
-    public CreationTransactionResponseDto createPixTransaction(CreateTransactionDto createTransactionDto){
+    public CreateTransactionResponseDto createPixTransaction(CreateTransactionDto createTransactionDto){
 
         Transaction transaction = createAndSaveTransaction(createTransactionDto);
-        DebitResponseDto transferStatus = ledgerService.createTransferEntries(transaction);
+        TransferResonseDto transferStatus = ledgerService.createTransferEntries(transaction);
 
-
-        return new CreationTransactionResponseDto(
+        return new CreateTransactionResponseDto(
                 transaction.getTransactionId(),
                 transferStatus
         );
-
-
     }
 
 

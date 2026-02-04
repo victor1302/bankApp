@@ -1,7 +1,7 @@
 package com.bankapp.controller;
 
 import com.bankapp.dto.Transaction.CreateTransactionDto;
-import com.bankapp.dto.Transaction.CreationTransactionResponseDto;
+import com.bankapp.dto.Transaction.CreateTransactionResponseDto;
 import com.bankapp.interfaces.TransactionProjection;
 import com.bankapp.service.TransactionService;
 import org.springframework.data.domain.Page;
@@ -23,8 +23,8 @@ public class TreansactionController {
 
     @PostMapping("/transactions")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_BASIC')")
-    public ResponseEntity<CreationTransactionResponseDto> createTransaction(@RequestBody CreateTransactionDto createTransactionDto){
-        CreationTransactionResponseDto creationTransactionResponseDto = transactionService.createPixTransaction(createTransactionDto);
+    public ResponseEntity<CreateTransactionResponseDto> createTransaction(@RequestBody CreateTransactionDto createTransactionDto){
+        CreateTransactionResponseDto creationTransactionResponseDto = transactionService.createPixTransaction(createTransactionDto);
         return ResponseEntity.ok(creationTransactionResponseDto);
     }
 
