@@ -21,11 +21,13 @@ public class InvoiceService {
     private final InvoiceRepository invoiceRepository;
     private final UserRepository userRepository;
     private final CardRepository cardRepository;
+    private final InstallmentService installmentService;
 
-    public InvoiceService(InvoiceRepository invoiceRepository, UserRepository userRepository, CardRepository cardRepository) {
+    public InvoiceService(InvoiceRepository invoiceRepository, UserRepository userRepository, CardRepository cardRepository, InstallmentService installmentService) {
         this.invoiceRepository = invoiceRepository;
         this.cardRepository = cardRepository;
         this.userRepository = userRepository;
+        this.installmentService = installmentService;
     }
 
     @Transactional
@@ -45,7 +47,6 @@ public class InvoiceService {
         Invoice newInvoice = new Invoice();
         newInvoice.setReferenceMonth(yearMonth);
 
-
         newInvoice.setTotalAmount(crateInvoiceRequestDto.totalAmount());
         newInvoice.setAmountPaid(BigDecimal.ZERO);
         newInvoice.setInstallmentCount(crateInvoiceRequestDto.installmentCount());
@@ -53,9 +54,7 @@ public class InvoiceService {
         newInvoice.setDescription(crateInvoiceRequestDto.description());
         newInvoice.setClosingDate(yearMonth.plusMonths(crateInvoiceRequestDto.installmentCount()));
         newInvoice.setCreditCard(userCard);
-        newInvoice.setInstallments(createInstallment(crateInvoiceRequestDto.totalAmount(),LocalDateTime.now(),crateInvoiceRequestDto.installmentCount(),
-                newInvoice));
-
+        newInvoice.setInstallments(installmentService.createInstallments(newInvoice));
         if(userCard.getCardInvoice() == null){
             userCard.setCardInvoice(new ArrayList<>());
         }
@@ -65,21 +64,6 @@ public class InvoiceService {
         return new CreateInvoiceResponseDto(newInvoice.getTotalAmount(), newInvoice.getInstallmentCount(), newInvoice.getDescription());
     }
 
-    public List<Installment> createInstallment(BigDecimal amount, LocalDateTime firstDueDate, int installmentNumber, Invoice invoice){
-        List<Installment> listInstallment = new ArrayList<>();
-        for(int i = 0; i < installmentNumber; i++){
-            Installment newInstallment = new Installment();
-            newInstallment.setAmount(amount.divide(BigDecimal.valueOf(installmentNumber),2, RoundingMode.HALF_UP));
-            newInstallment.setPaid(false);
-            newInstallment.setInvoice(invoice);
-            newInstallment.setInstallmentNumber(i + 1);
-
-            LocalDateTime dueDate = firstDueDate.plusMonths(i);
-            newInstallment.setDueDate(dueDate);
-            listInstallment.add(newInstallment);
-        }
-        return listInstallment;
-    }
 
 
 }

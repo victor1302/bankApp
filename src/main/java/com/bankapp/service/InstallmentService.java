@@ -14,8 +14,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class InstallmentService {
@@ -72,8 +76,24 @@ public class InstallmentService {
         cardUser.setAvailableLimit(cardUser.getAvailableLimit().add(installmentToPay.getAmount()));
 
 
-
         return new PayInstallmentResponseDto(true);
+    }
+
+    @Transactional
+    public List<Installment> createInstallments(Invoice invoice){
+        List<Installment> listInstallment = new ArrayList<>();
+        for(int i = 0; i < invoice.getInstallmentCount(); i++){
+            Installment newInstallment = new Installment();
+            newInstallment.setAmount(invoice.getTotalAmount().divide(BigDecimal.valueOf(invoice.getInstallmentCount()),2, RoundingMode.HALF_UP));
+            newInstallment.setPaid(false);
+            newInstallment.setInvoice(invoice);
+            newInstallment.setInstallmentNumber(i + 1);
+            LocalDateTime dueDate = LocalDateTime.now().plusMonths(i);
+            newInstallment.setDueDate(dueDate);
+            listInstallment.add(newInstallment);
+        }
+        return listInstallment;
+
     }
 
 }

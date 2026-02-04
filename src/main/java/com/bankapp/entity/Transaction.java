@@ -66,9 +66,6 @@ public class Transaction {
         this.destinationAccount = destinationAccount;
     }
 
-    public void setTransactionId(Long transactionId) {
-        this.transactionId = transactionId;
-    }
 
     public TransactionStatus getStatus() {
         return status;

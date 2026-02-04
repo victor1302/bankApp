@@ -1,6 +1,7 @@
 package com.bankapp.service;
 
-import com.bankapp.dto.LedgerEntry.Transfer.TransferResonseDto;
+import com.bankapp.dto.LedgerEntry.CreditResponseDto;
+import com.bankapp.dto.LedgerEntry.PixResonseDto;
 import com.bankapp.entity.*;
 import com.bankapp.entity.enums.EntryStatus;
 import com.bankapp.entity.enums.EntryType;
@@ -23,7 +24,7 @@ public class LedgerService {
     }
 
     @Transactional
-    public TransferResonseDto createTransferEntries(Transaction transaction) {
+    public PixResonseDto createPixLedger(Transaction transaction) {
         createLedgerEntry(
                 transaction.getSourceAccount().getAccountId(),
                 transaction.getAmount(),
@@ -40,7 +41,33 @@ public class LedgerService {
                 transaction.getTransactionId(),
                 "Pix"
         );
-        return new TransferResonseDto(
+        return new PixResonseDto(
+                transaction.getTransactionId(),
+                transaction.getAmount(),
+                transaction.getStatus(),
+                transaction.getCreationTimestamp()
+        );
+    }
+
+    @Transactional
+    public CreditResponseDto createCreditLedger(Transaction transaction){
+        createLedgerEntry(
+                transaction.getSourceAccount().getAccountId(),
+                transaction.getAmount(),
+                EntryType.DEBIT,
+                ReferenceType.CARD_PURCHASE,
+                transaction.getTransactionId(),
+                "Credit card receivable"
+        );
+        createLedgerEntry(
+                transaction.getDestinationAccount().getAccountId(),
+                transaction.getAmount(),
+                EntryType.CREDIT,
+                ReferenceType.CARD_PURCHASE,
+                transaction.getTransactionId(),
+                "Credit card purchase"
+        );
+        return new CreditResponseDto(
                 transaction.getTransactionId(),
                 transaction.getAmount(),
                 transaction.getStatus(),
@@ -57,7 +84,6 @@ public class LedgerService {
         entry.setReferenceId(referenceId);
         entry.setDescription(description);
         entry.setEntryStatus(EntryStatus.COMPLETED);
-
         return ledgerRepository.saveAndFlush(entry);
     }
 

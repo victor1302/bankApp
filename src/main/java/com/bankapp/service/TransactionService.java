@@ -1,6 +1,8 @@
 package com.bankapp.service;
 
-import com.bankapp.dto.LedgerEntry.Transfer.TransferResonseDto;
+import com.bankapp.dto.LedgerEntry.CreditResponseDto;
+import com.bankapp.dto.LedgerEntry.PixResonseDto;
+import com.bankapp.dto.Transaction.CreateCreditResponseDto;
 import com.bankapp.dto.Transaction.CreateTransactionDto;
 import com.bankapp.dto.Transaction.CreateTransactionResponseDto;
 import com.bankapp.entity.*;
@@ -36,8 +38,8 @@ public class TransactionService {
 
     @Transactional
     public CreateTransactionResponseDto createPixTransaction(CreateTransactionDto createTransactionDto){
-        Transaction transaction = createAndSaveTransaction(createTransactionDto);
-        TransferResonseDto transferStatus = ledgerService.createTransferEntries(transaction);
+        Transaction transaction = createAndVerifyTransaction(createTransactionDto);
+        PixResonseDto transferStatus = ledgerService.createPixLedger(transaction);
         updateCachedBalance(transaction);
 
         return new CreateTransactionResponseDto(
@@ -46,8 +48,22 @@ public class TransactionService {
         );
     }
 
+    @Transactional
+    public CreateCreditResponseDto createCreditTransaction(CreateTransactionDto createTransactionDto){
+        Transaction transaction = createAndVerifyTransaction(createTransactionDto);
+        CreditResponseDto transferStatus = ledgerService.createCreditLedger(transaction);
 
-    public Transaction createAndSaveTransaction(CreateTransactionDto createTransactionDto){
+        //adicionar as invoices aqui!!!
+
+        return new CreateCreditResponseDto(
+                transaction.getTransactionId(),
+                transferStatus
+        );
+
+    }
+
+
+    public Transaction createAndVerifyTransaction(CreateTransactionDto createTransactionDto){
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         User sourceUser = userRepository.findByEmail(user.getEmail())
@@ -58,7 +74,6 @@ public class TransactionService {
 
         Account destinationAccount = accountRepository.findById(createTransactionDto.destinationAccountId())
                 .orElseThrow(() -> new RuntimeException("Destination account not found!"));
-
 
         if(sourceAccount.getCachedBalance().compareTo(createTransactionDto.amount()) < 0){
             throw new AccountDontHaveEnoughMoney("Account dont have enough money!");
@@ -86,6 +101,8 @@ public class TransactionService {
         return newTransaction;
     }
 
+
+
     private void updateCachedBalance(Transaction transaction) {
         Account sourceAccount = transaction.getSourceAccount();
         Account destinationAccount = transaction.getDestinationAccount();
@@ -99,6 +116,7 @@ public class TransactionService {
         accountRepository.save(sourceAccount);
         accountRepository.save(destinationAccount);
     }
+
     @Transactional
     public Page<TransactionProjection> getTransactions(Pageable pageable){
         return transactionRepository.findAllBy(pageable);
