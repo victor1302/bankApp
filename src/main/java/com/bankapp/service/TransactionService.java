@@ -36,9 +36,9 @@ public class TransactionService {
 
     @Transactional
     public CreateTransactionResponseDto createPixTransaction(CreateTransactionDto createTransactionDto){
-
         Transaction transaction = createAndSaveTransaction(createTransactionDto);
         TransferResonseDto transferStatus = ledgerService.createTransferEntries(transaction);
+        updateCachedBalance(transaction);
 
         return new CreateTransactionResponseDto(
                 transaction.getTransactionId(),
@@ -85,8 +85,20 @@ public class TransactionService {
         transactionRepository.save(newTransaction);
         return newTransaction;
     }
-    
 
+    private void updateCachedBalance(Transaction transaction) {
+        Account sourceAccount = transaction.getSourceAccount();
+        Account destinationAccount = transaction.getDestinationAccount();
+
+        sourceAccount.setCachedBalance(
+                sourceAccount.getCachedBalance().subtract(transaction.getAmount())
+        );
+        destinationAccount.setCachedBalance(
+                destinationAccount.getCachedBalance().add(transaction.getAmount())
+        );
+        accountRepository.save(sourceAccount);
+        accountRepository.save(destinationAccount);
+    }
     @Transactional
     public Page<TransactionProjection> getTransactions(Pageable pageable){
         return transactionRepository.findAllBy(pageable);

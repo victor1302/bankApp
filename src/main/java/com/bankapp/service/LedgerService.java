@@ -24,7 +24,6 @@ public class LedgerService {
 
     @Transactional
     public TransferResonseDto createTransferEntries(Transaction transaction) {
-        updateCachedBalance(transaction);
         createLedgerEntry(
                 transaction.getSourceAccount().getAccountId(),
                 transaction.getAmount(),
@@ -62,17 +61,4 @@ public class LedgerService {
         return ledgerRepository.saveAndFlush(entry);
     }
 
-    private void updateCachedBalance(Transaction transaction) {
-        Account sourceAccount = transaction.getSourceAccount();
-        Account destinationAccount = transaction.getDestinationAccount();
-
-        sourceAccount.setCachedBalance(
-                sourceAccount.getCachedBalance().subtract(transaction.getAmount())
-        );
-        destinationAccount.setCachedBalance(
-                destinationAccount.getCachedBalance().add(transaction.getAmount())
-        );
-        accountRepository.save(sourceAccount);
-        accountRepository.save(destinationAccount);
-    }
 }
