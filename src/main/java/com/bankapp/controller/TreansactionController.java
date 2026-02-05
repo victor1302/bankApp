@@ -1,5 +1,6 @@
 package com.bankapp.controller;
 
+import com.bankapp.dto.Transaction.CreateCreditResponseDto;
 import com.bankapp.dto.Transaction.CreateTransactionDto;
 import com.bankapp.dto.Transaction.CreateTransactionResponseDto;
 import com.bankapp.interfaces.TransactionProjection;
@@ -26,6 +27,12 @@ public class TreansactionController {
     public ResponseEntity<CreateTransactionResponseDto> createTransaction(@RequestBody CreateTransactionDto createTransactionDto){
         CreateTransactionResponseDto creationTransactionResponseDto = transactionService.createPixTransaction(createTransactionDto);
         return ResponseEntity.ok(creationTransactionResponseDto);
+    }
+    @PostMapping("/transaction/credit")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_BASIC')")
+    public ResponseEntity<CreateCreditResponseDto> createCreditTransaction(@RequestBody CreateTransactionDto createTransactionDto){
+        CreateCreditResponseDto createCreditResponseDto = transactionService.createCreditTransaction(createTransactionDto);
+        return ResponseEntity.ok(createCreditResponseDto);
     }
 
     @GetMapping("/transaction")
