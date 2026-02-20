@@ -1,8 +1,6 @@
 package com.bankapp.controller;
 
-import com.bankapp.dto.Transaction.CreateCreditResponseDto;
-import com.bankapp.dto.Transaction.CreateTransactionDto;
-import com.bankapp.dto.Transaction.CreateTransactionResponseDto;
+import com.bankapp.dto.Transaction.*;
 import com.bankapp.interfaces.TransactionProjection;
 import com.bankapp.service.TransactionService;
 import org.springframework.data.domain.Page;
@@ -34,7 +32,12 @@ public class TreansactionController {
         CreateCreditResponseDto createCreditResponseDto = transactionService.createCreditTransaction(createTransactionDto);
         return ResponseEntity.ok(createCreditResponseDto);
     }
-
+    @PostMapping("/transaction/invoice")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_BASIC')")
+    public ResponseEntity<PayInvoiceResponse> payInvoice(@RequestBody PayInvoiceRequest payInvoiceRequest){
+        PayInvoiceResponse payInvoiceResponse = transactionService.payInvoice(payInvoiceRequest);
+        return ResponseEntity.ok(payInvoiceResponse);
+    }
     @GetMapping("/transaction")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Page<TransactionProjection>> getTransactions(@RequestParam(defaultValue = "0") int page,

@@ -1,6 +1,7 @@
 package com.bankapp.service;
 
 import com.bankapp.dto.LedgerEntry.CreditResponseDto;
+import com.bankapp.dto.LedgerEntry.InvoiceResponseDto;
 import com.bankapp.dto.LedgerEntry.PixResonseDto;
 import com.bankapp.entity.*;
 import com.bankapp.entity.enums.EntryStatus;
@@ -75,6 +76,24 @@ public class LedgerService {
         );
     }
 
+    @Transactional
+    public InvoiceResponseDto createInvoiceLedger(Transaction transaction){
+        createLedgerEntry(
+                transaction.getSourceAccount().getAccountId(),
+                transaction.getAmount(),
+                EntryType.DEBIT,
+                ReferenceType.INVOICE,
+                transaction.getTransactionId(),
+                "Paying invoice"
+        );
+        return new InvoiceResponseDto(
+                transaction.getTransactionId(),
+                transaction.getAmount(),
+                transaction.getStatus(),
+                transaction.getCreationTimestamp()
+        );
+    }
+
     private LedgerEntry createLedgerEntry(Long accountId, BigDecimal amount, EntryType entryType, ReferenceType referenceType, Long referenceId, String description){
         LedgerEntry entry = new LedgerEntry();
         entry.setAccountId(accountId);
@@ -86,5 +105,6 @@ public class LedgerService {
         entry.setEntryStatus(EntryStatus.COMPLETED);
         return ledgerRepository.saveAndFlush(entry);
     }
+
 
 }

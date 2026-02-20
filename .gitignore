@@ -6,6 +6,7 @@ target/
 *.pub
 *.key
 .env
+PROMPT.md
 
 ### STS ###
 .apt_generated

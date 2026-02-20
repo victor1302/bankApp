@@ -6,6 +6,7 @@ import com.bankapp.entity.Card;
 import com.bankapp.entity.Installment;
 import com.bankapp.entity.Invoice;
 import com.bankapp.entity.User;
+import com.bankapp.entity.enums.InvoiceStatus;
 import com.bankapp.repository.CardRepository;
 import com.bankapp.repository.InstallmentRepository;
 import com.bankapp.repository.InvoiceRepository;
@@ -66,7 +67,7 @@ public class InstallmentService {
             throw new RuntimeException("Installment is already paid!");
         }
         if(installmentToPay.getInstallmentNumber() == invoice.getInstallmentCount()){
-            invoice.setStatus(Invoice.InvoiceStatus.PAID);
+            invoice.setStatus(InvoiceStatus.PAID);
         }
         sourceUser.getUserAccount().setCachedBalance(sourceUser.getUserAccount().getCachedBalance().subtract(installmentToPay.getAmount()));
         installmentToPay.setPaid(true);

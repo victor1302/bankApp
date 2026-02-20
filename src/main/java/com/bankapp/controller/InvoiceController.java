@@ -1,7 +1,7 @@
 package com.bankapp.controller;
 
 import com.bankapp.dto.Invoice.CreateInvoiceResponseDto;
-import com.bankapp.dto.Invoice.CrateInvoiceRequestDto;
+import com.bankapp.dto.Invoice.CreateInvoiceRequestDto;
 import com.bankapp.service.InvoiceService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -22,7 +22,7 @@ public class InvoiceController {
 
     @PostMapping("/invoice")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_BASIC')")
-    public ResponseEntity<CreateInvoiceResponseDto> createInvoice(@RequestBody CrateInvoiceRequestDto crateInvoiceRequestDto){
+    public ResponseEntity<CreateInvoiceResponseDto> createInvoice(@RequestBody CreateInvoiceRequestDto crateInvoiceRequestDto){
         CreateInvoiceResponseDto createInvoiceResponseDto = invoiceService.createInvoice(crateInvoiceRequestDto);
         return ResponseEntity.ok(createInvoiceResponseDto);
     }

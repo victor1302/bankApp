@@ -1,5 +1,6 @@
 package com.bankapp.entity;
 
+import com.bankapp.entity.enums.InvoiceStatus;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 
@@ -21,6 +22,7 @@ public class Invoice {
     private YearMonth closingDate;
     private BigDecimal totalAmount;
     private BigDecimal amountPaid;
+    @Enumerated(EnumType.STRING)
     private InvoiceStatus status;
     private int installmentCount;
     @CreationTimestamp
@@ -35,14 +37,6 @@ public class Invoice {
     @OneToMany(mappedBy = "invoice", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Installment> installments = new ArrayList<>();
 
-    public enum InvoiceStatus{
-        OPEN,
-        CLOSED,
-        INSTALLMENT_PLAN,
-        PAID,
-        OVERDUE,
-        CANCELED
-    }
 
     public Long getInvoiceId() {
         return invoiceId;
