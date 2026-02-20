@@ -1,0 +1,18 @@
+spring:
+  application:
+    name: bankApp
+
+  datasource:
+    url: ${SPRING_DATABASE_URL:jdbc:postgresql://localhost:5432/bankapp}
+    username: ${SPRING_DATABASE_USERNAME:postgres}
+    password: ${SPRING_DATABASE_PASSWORD:admin}
+    driver-class-name: org.postgresql.Driver
+
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+api:
+  security:
+    token:
+      secret: ${SPRING_API_KEY_SECURITY:isabela}

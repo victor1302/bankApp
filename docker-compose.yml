@@ -6,11 +6,11 @@ services:
     container_name: postgres_db_bankApp
     restart: unless-stopped
     environment:
-      POSTGRES_DB: ${DATABASE_NAME}
-      POSTGRES_USER: ${DATABASE_USERNAME}
-      POSTGRES_PASSWORD: ${DATABASE_PASSWORD}
+      POSTGRES_DB: ${SPRING_DATABASE_USERNAME}
+      POSTGRES_USER: ${SPRING_DATABASE_USERNAME}
+      POSTGRES_PASSWORD: ${SPRING_DATABASE_PASSWORD}
     ports:
-      - "${DATABASE_PORT}:5432"
+      - "${SPRING_DATABASE_PORT}:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
 volumes:
