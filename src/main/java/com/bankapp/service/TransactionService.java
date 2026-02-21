@@ -9,6 +9,7 @@ import com.bankapp.dto.Transaction.*;
 import com.bankapp.entity.*;
 import com.bankapp.entity.enums.InvoiceStatus;
 import com.bankapp.entity.enums.TransactionStatus;
+import com.bankapp.entity.enums.TransactionType;
 import com.bankapp.exception.AccountDontHaveEnoughMoney;
 import com.bankapp.exception.UserOrAccountDisabled;
 import com.bankapp.interfaces.TransactionProjection;
@@ -22,6 +23,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.lang.reflect.Type;
 import java.math.BigDecimal;
 import java.time.Instant;
 
@@ -46,7 +48,10 @@ public class TransactionService {
 
     @Transactional
     public CreateTransactionResponseDto createPixTransaction(CreateTransactionDto createTransactionDto){
-        Transaction transaction = createAndVerifyTransaction(createTransactionDto);
+        Transaction transaction = createAndVerifyTransaction(createTransactionDto.transactionType(),
+                createTransactionDto.amount(),
+                createTransactionDto.destinationAccountId());
+
         PixResonseDto transferStatus = ledgerService.createPixLedger(transaction);
         updateCachedBalance(transaction);
 
@@ -56,56 +61,9 @@ public class TransactionService {
         );
     }
 
-    @Transactional
-    public CreateCreditResponseDto createCreditTransaction(CreateTransactionDto createTransactionDto){
-        Transaction transaction = createAndVerifyTransaction(createTransactionDto);
-        CreditResponseDto transferStatus = ledgerService.createCreditLedger(transaction);
-        createInvoiceForCreditTransaction(transaction, createTransactionDto);
-        updateCachedBalanceForCreditTransactions(transaction);
-
-        return new CreateCreditResponseDto(
-                transaction.getTransactionId(),
-                transferStatus
-        );
-
-    }
-
-    @Transactional
-    public PayInvoiceResponse payInvoice(PayInvoiceRequest payInvoiceRequest){
-        Transaction transaction = createAndVerifyTransactionToPayInvoice(payInvoiceRequest);
-        invoiceService.payInvoice(payInvoiceRequest.invoiceId(), payInvoiceRequest.amount());
-        InvoiceResponseDto transferStatus = ledgerService.createInvoiceLedger(transaction);
-        updateCachedBalanceForPayInvoice(transaction);
-        return new PayInvoiceResponse(
-                payInvoiceRequest.amount(),
-                transferStatus
-        );
-    }
-
-    @Transactional
-    protected CreateInvoiceResponseDto createInvoiceForCreditTransaction(Transaction transaction,
-                                                                         CreateTransactionDto createTransactionDto) {
-        Account sourceAccount = transaction.getSourceAccount();
-        Account destinationAccount = transaction.getDestinationAccount();
-
-        Long sourceAccountId = sourceAccount.getAccountId();
-        Long destinationAccountId = destinationAccount.getAccountId();
-        BigDecimal totalAmount = transaction.getAmount();
-
-        int installmentCount = createTransactionDto.totalInstallments();
-        String description = createTransactionDto.description();
-
-        CreateInvoiceRequestDto invoiceRequest = new CreateInvoiceRequestDto(
-                sourceAccountId,
-                destinationAccountId,
-                totalAmount,
-                installmentCount,
-                description
-        );
-
-        return invoiceService.createInvoice(invoiceRequest);
-    }
-    public Transaction createAndVerifyTransaction(CreateTransactionDto createTransactionDto){
+    public Transaction createAndVerifyTransaction(TransactionType transactionType,
+                                                  BigDecimal amount,
+                                                  Long destinationAccountIdOrNull){
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         User sourceUser = userRepository.findByEmail(user.getEmail())
@@ -114,94 +72,107 @@ public class TransactionService {
         Account sourceAccount = accountRepository.findById(sourceUser.getUserAccount().getAccountId())
                 .orElseThrow(() -> new RuntimeException("Source account not found!"));
 
-        Account destinationAccount = accountRepository.findById(createTransactionDto.destinationAccountId())
-                .orElseThrow(() -> new RuntimeException("Destination account not found!"));
-
-        if(sourceAccount.getCachedBalance().compareTo(createTransactionDto.amount()) < 0){
-            throw new AccountDontHaveEnoughMoney("Account don't have enough money!");
-        }
-        if(createTransactionDto.amount().equals(BigDecimal.ZERO)){
-            throw new RuntimeException("You cant send $0");
-        }
-        if(sourceAccount == destinationAccount){
-            throw new RuntimeException("You can't send money to yourself");
+        Account destinationAccount = null;
+        if(destinationAccountIdOrNull != null){
+            destinationAccount = accountRepository.findById(destinationAccountIdOrNull)
+                    .orElseThrow(() -> new RuntimeException("Destination account not found"));
         }
 
-        if(!sourceAccount.isActive() || !destinationAccount.isActive()){
-            throw new UserOrAccountDisabled("Source or destination account do not exists or disabled");
-        }
-        if(!sourceUser.isActive()){
-            throw new UserOrAccountDisabled("Source user do not exists or disabled");
-        }
+        validateByType(transactionType, amount, sourceAccount, destinationAccount, sourceUser);
         Transaction newTransaction = new Transaction();
         newTransaction.setDestinationAccount(destinationAccount);
         newTransaction.setSourceAccount(sourceAccount);
         newTransaction.setStatus(TransactionStatus.COMPLETED);
-        newTransaction.setAmount(createTransactionDto.amount());
+        newTransaction.setAmount(amount);
+        newTransaction.setTransactionType(transactionType);
 
-        transactionRepository.save(newTransaction);
-        return newTransaction;
+        return transactionRepository.save(newTransaction);
+
     }
 
-    public Transaction createAndVerifyTransactionToPayInvoice(PayInvoiceRequest payInvoiceRequest){
-        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
-
-        Account sourceAccount = accountRepository.findById(user.getUserAccount().getAccountId()).
-                orElseThrow( () -> new RuntimeException("Not found source account"));
-
-        Invoice invoice = invoiceRepository.findById(payInvoiceRequest.invoiceId())
-                .orElseThrow(() -> new RuntimeException("Not found the invoice"));
-
-        if(!invoice.getCreditCard().getCardAccount().getAccountId().equals(sourceAccount.getAccountId())){
-            throw new RuntimeException("This invoice does not belong to you");
+    private void validateByType(TransactionType transactionType,
+                                BigDecimal amount,
+                                Account sourceAccount,
+                                Account destinationAccount,
+                                User sourceUser) {
+        if (!sourceUser.isActive()) {
+            throw new UserOrAccountDisabled("Source user do not exists or disabled");
         }
-        if(!invoice.getStatus().equals(InvoiceStatus.OPEN)){
-            throw new RuntimeException("You cant pay this invoice");
+        if (!sourceAccount.isActive()) {
+            throw new UserOrAccountDisabled("Source account do not exists or disabled");
         }
 
-        BigDecimal remaining = invoice.getTotalAmount().subtract(invoice.getAmountPaid());
-        if(payInvoiceRequest.amount().compareTo(BigDecimal.ZERO) <= 0 || payInvoiceRequest.amount().compareTo(remaining) > 0){
-            throw new RuntimeException("Invalid payment amount");
-        }
+        switch (transactionType) {
+            case PIX_TRANSFER -> {
+                if (destinationAccount == null) {
+                    throw new RuntimeException("Destination account is required for PIX_TRANSFER");
+                }
+                if (!destinationAccount.isActive()) {
+                    throw new UserOrAccountDisabled("Destination account do not exists or disabled");
+                }
+                if (sourceAccount.getAccountId().equals(destinationAccount.getAccountId())) {
+                    throw new RuntimeException("You can't send money to yourself");
+                }
+                if (sourceAccount.getCachedBalance().compareTo(amount) < 0) {
+                    throw new AccountDontHaveEnoughMoney("Account don't have enough money!");
+                }
+            }
+            case CREDIT_PURCHASE -> {
+                if (destinationAccount == null) {
+                    throw new RuntimeException("Destination account is required for CREDIT_PURCHASE");
+                }
+                if (!destinationAccount.isActive()) {
+                    throw new UserOrAccountDisabled("Destination account do not exists or disabled");
+                }
+            }
+            case INVOICE_PAYMENT -> {
+                if (destinationAccount != null) {
+                    throw new RuntimeException(transactionType + " must not have destination account");
+                }
+                if (sourceAccount.getCachedBalance().compareTo(amount) < 0) {
+                    throw new AccountDontHaveEnoughMoney("Account don't have enough money!");
+                }
+            }
+            case DEPOSIT -> {
+                if (destinationAccount == null) {
+                    throw new RuntimeException("Destination account is required for DEPOSIT");
+                }
+                if (!destinationAccount.isActive()) {
+                    throw new UserOrAccountDisabled("Destination account do not exists or disabled");
+                }
+            }
 
-        Transaction newTransaction = new Transaction();
-        newTransaction.setSourceAccount(sourceAccount);
-        newTransaction.setStatus(TransactionStatus.COMPLETED);
-        newTransaction.setAmount(payInvoiceRequest.amount());
-        transactionRepository.save(newTransaction);
-        return newTransaction;
+        }
     }
-
 
     private void updateCachedBalance(Transaction transaction) {
         Account sourceAccount = transaction.getSourceAccount();
         Account destinationAccount = transaction.getDestinationAccount();
+        BigDecimal amount = transaction.getAmount();
 
-        sourceAccount.setCachedBalance(
-                sourceAccount.getCachedBalance().subtract(transaction.getAmount())
-        );
-        destinationAccount.setCachedBalance(
-                destinationAccount.getCachedBalance().add(transaction.getAmount())
-        );
-        accountRepository.save(sourceAccount);
-        accountRepository.save(destinationAccount);
-    }
-    private void updateCachedBalanceForCreditTransactions(Transaction transaction){
-        Account destinationAccount = transaction.getDestinationAccount();
-        destinationAccount.setCachedBalance(
-                destinationAccount.getCachedBalance().add(transaction.getAmount())
-        );
-        accountRepository.save(destinationAccount);
-    }
-    private void updateCachedBalanceForPayInvoice(Transaction transaction){
-        Account sourceAccount = transaction.getSourceAccount();
-        sourceAccount.setCachedBalance(
-                sourceAccount.getCachedBalance().subtract(transaction.getAmount())
-        );
-        accountRepository.save(sourceAccount);
+        switch (transaction.getTransactionType()) {
+            case PIX_TRANSFER -> {
+                sourceAccount.setCachedBalance(sourceAccount.getCachedBalance().subtract(amount));
+                destinationAccount.setCachedBalance(destinationAccount.getCachedBalance().add(amount));
+                accountRepository.save(sourceAccount);
+                accountRepository.save(destinationAccount);
+            }
+            case CREDIT_PURCHASE -> {
+                destinationAccount.setCachedBalance(destinationAccount.getCachedBalance().add(amount));
+                accountRepository.save(destinationAccount);
+            }
+            case INVOICE_PAYMENT -> {
+                sourceAccount.setCachedBalance(sourceAccount.getCachedBalance().subtract(amount));
+                accountRepository.save(sourceAccount);
+            }
+            case DEPOSIT -> {
+                destinationAccount.setCachedBalance(destinationAccount.getCachedBalance().add(amount));
+                accountRepository.save(destinationAccount);
+            }
+        }
     }
 
-    @Transactional
+    @Transactional(readOnly = true)
     public Page<TransactionProjection> getTransactions(Pageable pageable){
         return transactionRepository.findAllBy(pageable);
     }

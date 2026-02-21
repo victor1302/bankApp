@@ -26,18 +26,6 @@ public class TreansactionController {
         CreateTransactionResponseDto creationTransactionResponseDto = transactionService.createPixTransaction(createTransactionDto);
         return ResponseEntity.ok(creationTransactionResponseDto);
     }
-    @PostMapping("/transaction/credit")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_BASIC')")
-    public ResponseEntity<CreateCreditResponseDto> createCreditTransaction(@RequestBody CreateTransactionDto createTransactionDto){
-        CreateCreditResponseDto createCreditResponseDto = transactionService.createCreditTransaction(createTransactionDto);
-        return ResponseEntity.ok(createCreditResponseDto);
-    }
-    @PostMapping("/transaction/invoice")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_BASIC')")
-    public ResponseEntity<PayInvoiceResponse> payInvoice(@RequestBody PayInvoiceRequest payInvoiceRequest){
-        PayInvoiceResponse payInvoiceResponse = transactionService.payInvoice(payInvoiceRequest);
-        return ResponseEntity.ok(payInvoiceResponse);
-    }
     @GetMapping("/transaction")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Page<TransactionProjection>> getTransactions(@RequestParam(defaultValue = "0") int page,
