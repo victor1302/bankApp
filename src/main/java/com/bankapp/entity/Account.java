@@ -29,6 +29,9 @@ public class Account {
     @Enumerated(EnumType.STRING)
     private AccountType accountType;
 
+    protected Account(){
+
+    }
 
     public Account(User userAccount, int accountNumber){
         this.accountType = AccountType.USER;

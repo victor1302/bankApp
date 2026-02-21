@@ -35,15 +35,14 @@ public class TransactionService {
     private final UserRepository userRepository;
     private final LedgerService ledgerService;
     private final InvoiceService invoiceService;
-    private final InvoiceRepository invoiceRepository;
 
-    public TransactionService(TransactionRepository transactionRepository, UserRepository userRepository, AccountRepository accountRepository, LedgerService ledgerService, InvoiceService invoiceService, InvoiceRepository invoiceRepository) {
+
+    public TransactionService(TransactionRepository transactionRepository, UserRepository userRepository, AccountRepository accountRepository, LedgerService ledgerService, InvoiceService invoiceService) {
         this.transactionRepository = transactionRepository;
         this.userRepository = userRepository;
         this.accountRepository = accountRepository;
         this.ledgerService = ledgerService;
         this.invoiceService = invoiceService;
-        this.invoiceRepository = invoiceRepository;
     }
 
     @Transactional
@@ -59,6 +58,43 @@ public class TransactionService {
                 transaction.getTransactionId(),
                 transferStatus
         );
+    }
+
+
+    @Transactional
+    public CreateCreditResponse createCreditTransaction(CreateCreditRequest createCreditRequest){
+        Transaction transaction = createAndVerifyTransaction(
+                TransactionType.CREDIT_PURCHASE,
+                createCreditRequest.amount(),
+                createCreditRequest.destinationAccountId()
+        );
+        CreditResponseDto transferStatus = ledgerService.createCreditLedger(transaction);
+        CreateInvoiceResponseDto invoiceResponse = createInvoiceForCreditTransaction(transaction, createCreditRequest);
+
+        return new CreateCreditResponse(
+                transaction.getTransactionId(),
+                transferStatus,
+                invoiceResponse
+        );
+    }
+
+
+
+
+    @Transactional
+    public CreateInvoiceResponseDto createInvoiceForCreditTransaction(Transaction transaction,
+                                                                      CreateCreditRequest createCreditRequest){
+        Account sourceAccount = transaction.getSourceAccount();
+        Account destinationAccount = transaction.getDestinationAccount();
+
+        CreateInvoiceRequestDto invoiceRequest = new CreateInvoiceRequestDto(
+                sourceAccount.getAccountId(),
+                destinationAccount.getAccountId(),
+                transaction.getAmount(),
+                createCreditRequest.totalInstallments(),
+                createCreditRequest.description()
+        );
+        return invoiceService.createInvoice(invoiceRequest);
     }
 
     public Transaction createAndVerifyTransaction(TransactionType transactionType,

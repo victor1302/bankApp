@@ -26,12 +26,19 @@ public class TreansactionController {
         CreateTransactionResponseDto creationTransactionResponseDto = transactionService.createPixTransaction(createTransactionDto);
         return ResponseEntity.ok(creationTransactionResponseDto);
     }
-    @GetMapping("/transaction")
+
+    @GetMapping("/transactions")
     @PreAuthorize("hasAuthority('ROLE_ADMIN')")
     public ResponseEntity<Page<TransactionProjection>> getTransactions(@RequestParam(defaultValue = "0") int page,
                                                                        @RequestParam(defaultValue = "10") int size){
         Pageable pageable = PageRequest.of(page,size);
         Page<TransactionProjection> transactions = transactionService.getTransactions(pageable);
         return ResponseEntity.ok(transactions);
+    }
+    @PostMapping("/transactions/credit")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_BASIC')")
+    public ResponseEntity<CreateCreditResponse> createInvoiceTransaction(@RequestBody CreateCreditRequest createCreditRequest){
+        CreateCreditResponse creationTransactionResponseDto = transactionService.createCreditTransaction(createCreditRequest);
+        return ResponseEntity.ok(creationTransactionResponseDto);
     }
 }
