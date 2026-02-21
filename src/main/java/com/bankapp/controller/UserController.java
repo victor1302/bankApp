@@ -23,7 +23,7 @@ public class UserController {
 
     @PostMapping("/auth/register")
     public ResponseEntity<Void> createUser(@RequestBody CreateUserDto createUserDto){
-        userService.createUser(createUserDto.username(), createUserDto.password(), createUserDto.phoneNumber(), createUserDto.address(), createUserDto.age(), createUserDto.email());
+        userService.createUser(createUserDto.username(), createUserDto.password(), createUserDto.phoneNumber(), createUserDto.address(), createUserDto.age(), createUserDto.email(), createUserDto.userType());
         return ResponseEntity.status(HttpStatus.CREATED).build();
     }
 

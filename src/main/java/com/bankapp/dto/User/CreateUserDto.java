@@ -1,5 +1,6 @@
 package com.bankapp.dto.User;
 
+import com.bankapp.entity.enums.UserType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 
@@ -8,5 +9,6 @@ public record CreateUserDto(@NotNull String username,
                             @Size(max = 12) String phoneNumber,
                             @Size(max = 30) String address,
                             @NotNull String email,
-                            @NotNull int age) {
+                            @NotNull int age,
+                            @NotNull UserType userType) {
 }

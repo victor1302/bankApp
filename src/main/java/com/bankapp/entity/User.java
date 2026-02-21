@@ -1,5 +1,6 @@
 package com.bankapp.entity;
 
+import com.bankapp.entity.enums.UserType;
 import jakarta.persistence.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -40,6 +41,8 @@ public class User {
     private int age;
     @Column(nullable = false)
     private String password;
+    @Enumerated(EnumType.STRING)
+    private UserType userType;
 
 
     public UUID getUserId() {
@@ -122,7 +125,7 @@ public class User {
         this.creationTimestamp = creationTimestamp;
     }
 
-    public boolean isLoginCorret(String password, PasswordEncoder passwordEncoder) {
+    public boolean isLoginCorrect(String password, PasswordEncoder passwordEncoder) {
         return passwordEncoder.matches(password, this.password);
     }
 
@@ -132,5 +135,13 @@ public class User {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public UserType getUserType() {
+        return userType;
+    }
+
+    public void setUserType(UserType userType) {
+        this.userType = userType;
     }
 }

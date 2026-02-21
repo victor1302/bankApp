@@ -3,6 +3,7 @@ package com.bankapp.service;
 import com.bankapp.dto.Account.CreateAccountResponseDto;
 import com.bankapp.entity.Account;
 import com.bankapp.entity.User;
+import com.bankapp.entity.enums.UserType;
 import com.bankapp.exception.AlreadyDisabledOrNotPresent;
 import com.bankapp.exception.AlreadyExistsException;
 import com.bankapp.repository.AccountRepository;
@@ -32,7 +33,19 @@ public class AccountService {
         int newAccountNumber = (lastAccountNumber != null) ? lastAccountNumber + 1 : 1;
         Account newAccount = new Account(user, newAccountNumber);
         user.setUserAccount(newAccount);
+        updateBalanceByType(user.getUserType(), newAccount);
         return new CreateAccountResponseDto(newAccount.getAccountNumber(), newAccount.getCachedBalance());
+    }
+
+    protected void updateBalanceByType(UserType userType, Account account){
+        switch (userType){
+            case TEST -> {
+                account.setCachedBalance(BigDecimal.valueOf(999999999));
+            }
+            case NORMAL -> {
+                account.setCachedBalance(BigDecimal.valueOf(0));
+            }
+        }
     }
     @Transactional
     public Account disableAccount(Long accountId){

@@ -70,6 +70,7 @@ public class LedgerService {
         );
         return new CreditResponseDto(
                 transaction.getTransactionId(),
+                transaction.getTransactionType(),
                 transaction.getAmount(),
                 transaction.getStatus(),
                 transaction.getCreationTimestamp()

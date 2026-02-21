@@ -4,6 +4,7 @@ import com.bankapp.dto.User.LoginRequestDto;
 import com.bankapp.dto.User.LoginResponseDto;
 import com.bankapp.entity.Role;
 import com.bankapp.entity.User;
+import com.bankapp.entity.enums.UserType;
 import com.bankapp.exception.AlreadyExistsException;
 import com.bankapp.exception.AlreadyDisabledOrNotPresent;
 import com.bankapp.interfaces.UserProjection;
@@ -49,7 +50,7 @@ public class UserService {
 
 
     @Transactional
-    public User createUser(String username, String password, String phoneNumber, String address, int age, String email){
+    public User createUser(String username, String password, String phoneNumber, String address, int age, String email, UserType userType){
         var basicRole = roleRepository.findByName(Role.Values.BASIC.name());
 
         if(userRepository.existsByUsername(username)){
@@ -63,9 +64,13 @@ public class UserService {
         user.setAge(age);
         user.setEmail(email);
         user.setActive(true);
+        user.setUserType(userType);
         user.setUserRole(Set.of(basicRole));
         return userRepository.save(user);
     }
+
+
+
     @Transactional
     public Page<UserProjection> getUsers(Pageable pageable){
         return userRepository.findAllBy(pageable);

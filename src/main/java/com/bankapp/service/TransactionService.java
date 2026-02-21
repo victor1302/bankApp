@@ -71,11 +71,14 @@ public class TransactionService {
         updateCachedBalance(transaction);
         CreditResponseDto transferStatus = ledgerService.createCreditLedger(transaction);
         CreateInvoiceResponseDto invoiceResponse = createInvoiceForCreditTransaction(transaction, createCreditRequest);
+        GetTransactionAccount sourceAccount = getSourceAccount(transaction);
+        GetTransactionAccount destinationAccount = getDestinationAccount(transaction);
 
         return new CreateCreditResponse(
-                transaction.getTransactionId(),
                 transferStatus,
-                invoiceResponse
+                invoiceResponse,
+                sourceAccount,
+                destinationAccount
         );
     }
 
@@ -113,6 +116,20 @@ public class TransactionService {
         );
     }
 
+    public GetTransactionAccount getSourceAccount(Transaction transaction){
+        return new GetTransactionAccount(
+                transaction.getSourceAccount().getUserAccount().getUserId(),
+                transaction.getSourceAccount().getAccountNumber(),
+                transaction.getSourceAccount().getUserAccount().getUsername()
+        );
+    }
+    public GetTransactionAccount getDestinationAccount(Transaction transaction){
+        return new GetTransactionAccount(
+                transaction.getDestinationAccount().getUserAccount().getUserId(),
+                transaction.getDestinationAccount().getAccountNumber(),
+                transaction.getDestinationAccount().getUserAccount().getUsername()
+        );
+    }
 
     private Transaction createAndVerifyTransaction(TransactionType transactionType,
                                                   BigDecimal amount,
@@ -153,6 +170,9 @@ public class TransactionService {
         }
         if (!sourceAccount.isActive()) {
             throw new UserOrAccountDisabled("Source account do not exists or disabled");
+        }
+        if(sourceAccount.getUserAccount().getUserId().equals(destinationAccount.getUserAccount().getUserId())){
+            throw new RuntimeException("You cant make a transaction for yourself");
         }
 
         switch (transactionType) {
