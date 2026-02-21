@@ -1,6 +1,5 @@
 package com.bankapp.dto.Transaction;
 
-import com.bankapp.dto.LedgerEntry.CreditResponseDto;
 
 import java.math.BigDecimal;
 

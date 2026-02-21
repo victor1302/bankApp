@@ -2,8 +2,11 @@ package com.bankapp.service;
 
 import com.bankapp.dto.Invoice.CreateInvoiceResponseDto;
 import com.bankapp.dto.Invoice.CreateInvoiceRequestDto;
+import com.bankapp.dto.LedgerEntry.InvoiceResponseDto;
+import com.bankapp.dto.Transaction.PayInvoiceResponse;
 import com.bankapp.entity.*;
 import com.bankapp.entity.enums.InvoiceStatus;
+import com.bankapp.entity.enums.TransactionStatus;
 import com.bankapp.repository.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -12,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.time.*;
 import java.util.ArrayList;
+import java.util.List;
 
 @Service
 public class InvoiceService {
@@ -70,7 +74,7 @@ public class InvoiceService {
     }
 
     @Transactional
-    public void payInvoice(Long invoiceId, BigDecimal amount){
+    public InvoiceResponseDto payInvoice(Long invoiceId){
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Account sourceAccount = accountRepository.findById(user.getUserAccount().getAccountId()).
@@ -78,14 +82,35 @@ public class InvoiceService {
 
         Invoice invoice = invoceRepository.findById(invoiceId)
                 .orElseThrow(() -> new RuntimeException("Not found the invoice"));
-        invoice.setAmountPaid(invoice.getAmountPaid().add(amount));
-        if(invoice.getAmountPaid().compareTo(invoice.getTotalAmount()) >= 0){
-            invoice.setStatus(InvoiceStatus.PAID);
-            invoice.setUpdatedAt(Instant.now());
+
+        if(!invoice.getCreditCard().getCardAccount().equals(sourceAccount)){
+            throw new RuntimeException("You can't pay one invoice that does not belong to you!");
         }
+        if(!InvoiceStatus.OPEN.equals(invoice.getStatus())){
+            throw new RuntimeException("You cant pay this invoice");
+        }
+
+        invoice.setAmountPaid(invoice.getTotalAmount());
+        invoice.setStatus(InvoiceStatus.PAID);
+        invoice.setUpdatedAt(Instant.now());
+
+        List<Installment> invoiceInstallments = invoice.getInstallments();
+        for(Installment installments : invoiceInstallments){
+            installments.setPaid(true);
+            installments.setPaymentDate(invoice.getUpdatedAt());
+        }
+
+
         Card card = invoice.getCreditCard();
-        card.setAvailableLimit(card.getAvailableLimit().add(amount));
+        card.setAvailableLimit(card.getAvailableLimit().add(invoice.getAmountPaid()));
         cardRepository.save(card);
+
+        return new InvoiceResponseDto(
+                invoice.getInvoiceId(),
+                invoice.getAmountPaid(),
+                TransactionStatus.COMPLETED,
+                invoice.getUpdatedAt()
+        );
 
     }
 

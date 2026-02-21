@@ -68,6 +68,7 @@ public class TransactionService {
                 createCreditRequest.amount(),
                 createCreditRequest.destinationAccountId()
         );
+        updateCachedBalance(transaction);
         CreditResponseDto transferStatus = ledgerService.createCreditLedger(transaction);
         CreateInvoiceResponseDto invoiceResponse = createInvoiceForCreditTransaction(transaction, createCreditRequest);
 
@@ -77,8 +78,6 @@ public class TransactionService {
                 invoiceResponse
         );
     }
-
-
 
 
     @Transactional
@@ -97,7 +96,25 @@ public class TransactionService {
         return invoiceService.createInvoice(invoiceRequest);
     }
 
-    public Transaction createAndVerifyTransaction(TransactionType transactionType,
+    @Transactional
+    public PayInvoiceResponse payFullInvoice(Long invoiceId){
+
+        InvoiceResponseDto invoiceResponseDto = invoiceService.payInvoice(invoiceId);
+        Transaction transaction = createAndVerifyTransaction(
+                TransactionType.INVOICE_PAYMENT,
+                invoiceResponseDto.amount(),
+                null
+        );
+        InvoiceResponseDto ledgerEntry = ledgerService.createInvoiceLedger(transaction);
+        updateCachedBalance(transaction);
+
+        return new PayInvoiceResponse(
+                invoiceResponseDto
+        );
+    }
+
+
+    private Transaction createAndVerifyTransaction(TransactionType transactionType,
                                                   BigDecimal amount,
                                                   Long destinationAccountIdOrNull){
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();

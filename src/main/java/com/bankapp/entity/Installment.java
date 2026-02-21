@@ -4,7 +4,6 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "tb_installment")
@@ -15,8 +14,8 @@ public class Installment{
     private Long installmentId;
     private Integer installmentNumber;
     private BigDecimal amount;
-    private LocalDateTime dueDate;
-    private LocalDateTime paymentDate;
+    private Instant dueDate;
+    private Instant paymentDate;
     private boolean paid;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -47,13 +46,6 @@ public class Installment{
         this.amount = amount;
     }
 
-    public LocalDateTime getDueDate() {
-        return dueDate;
-    }
-
-    public void setDueDate(LocalDateTime dueDate) {
-        this.dueDate = dueDate;
-    }
 
     public boolean isPaid() {
         return paid;
@@ -71,11 +63,19 @@ public class Installment{
         this.invoice = invoice;
     }
 
-    public LocalDateTime getPaymentDate() {
+    public Instant getDueDate() {
+        return dueDate;
+    }
+
+    public void setDueDate(Instant dueDate) {
+        this.dueDate = dueDate;
+    }
+
+    public Instant getPaymentDate() {
         return paymentDate;
     }
 
-    public void setPaymentDate(LocalDateTime paymentDate) {
+    public void setPaymentDate(Instant paymentDate) {
         this.paymentDate = paymentDate;
     }
 }

@@ -19,6 +19,8 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZonedDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -71,7 +73,7 @@ public class InstallmentService {
         }
         sourceUser.getUserAccount().setCachedBalance(sourceUser.getUserAccount().getCachedBalance().subtract(installmentToPay.getAmount()));
         installmentToPay.setPaid(true);
-        installmentToPay.setPaymentDate(LocalDateTime.now());
+        installmentToPay.setPaymentDate(Instant.now());
         invoice.setAmountPaid(invoice.getAmountPaid().add(installmentToPay.getAmount()));
         invoice.setUpdatedAt(Instant.now());
         cardUser.setAvailableLimit(cardUser.getAvailableLimit().add(installmentToPay.getAmount()));
@@ -89,7 +91,7 @@ public class InstallmentService {
             newInstallment.setPaid(false);
             newInstallment.setInvoice(invoice);
             newInstallment.setInstallmentNumber(i + 1);
-            LocalDateTime dueDate = LocalDateTime.now().plusMonths(i);
+            Instant dueDate = ZonedDateTime.now().plusMonths(i+1).toInstant();
             newInstallment.setDueDate(dueDate);
             listInstallment.add(newInstallment);
         }

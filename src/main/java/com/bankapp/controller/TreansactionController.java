@@ -41,4 +41,10 @@ public class TreansactionController {
         CreateCreditResponse creationTransactionResponseDto = transactionService.createCreditTransaction(createCreditRequest);
         return ResponseEntity.ok(creationTransactionResponseDto);
     }
+    @PutMapping("/transactions/pay/invoice/{id}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_BASIC')")
+    public ResponseEntity<PayInvoiceResponse> payFullInvoice(@PathVariable Long id){
+        PayInvoiceResponse response = transactionService.payFullInvoice(id);
+        return ResponseEntity.ok(response);
+    }
 }
