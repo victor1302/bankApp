@@ -29,9 +29,6 @@ public class Account {
     @Enumerated(EnumType.STRING)
     private AccountType accountType;
 
-    protected Account() {
-
-    }
 
     public Account(User userAccount, int accountNumber){
         this.accountType = AccountType.USER;
@@ -96,5 +93,13 @@ public class Account {
 
     public void setCardAccount(Card cardAccount) {
         this.cardAccount = cardAccount;
+    }
+
+    public AccountType getAccountType() {
+        return accountType;
+    }
+
+    public void setAccountType(AccountType accountType) {
+        this.accountType = accountType;
     }
 }
