@@ -50,7 +50,7 @@ public class UserService {
 
 
     @Transactional
-    public User createUser(String username, String password, String phoneNumber, String address, int age, String email, UserType userType){
+    public void createUser(String username, String password, String phoneNumber, String address, int age, String email, UserType userType){
         var basicRole = roleRepository.findByName(Role.Values.BASIC.name());
 
         if(userRepository.existsByUsername(username)){
@@ -66,26 +66,24 @@ public class UserService {
         user.setActive(true);
         user.setUserType(userType);
         user.setUserRole(Set.of(basicRole));
-        return userRepository.save(user);
+        userRepository.save(user);
     }
-
-
 
     @Transactional
     public Page<UserProjection> getUsers(Pageable pageable){
         return userRepository.findAllBy(pageable);
     }
     @Transactional
-    public User disableUser(UUID userId){
-        return userRepository.findById(userId)
-                .map(user ->{
-                    if(!user.isActive() || user.getUserAccount().isActive()){
+    public void disableUser(UUID userId){
+        userRepository.findById(userId)
+                .map(user -> {
+                    if (!user.isActive() || user.getUserAccount().isActive()) {
                         throw new AlreadyDisabledOrNotPresent("User not present or already disabled or have an active account");
                     }
                     user.setActive(false);
                     return userRepository.save(user);
                 })
-                .orElseThrow(()-> new AlreadyDisabledOrNotPresent("User not present or already disabled"));
+                .orElseThrow(() -> new AlreadyDisabledOrNotPresent("User not present or already disabled"));
     }
 
 
