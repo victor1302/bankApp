@@ -1,6 +1,5 @@
 package com.bankapp.interfaces;
 
-import com.bankapp.entity.Account;
 
 import java.util.UUID;
 
@@ -10,5 +9,5 @@ public interface UserProjection {
     AccountProjection getUserAccount();
     String getAddress();
     int getAge();
-    boolean getisActive();
+    boolean getIsActive();
 }
