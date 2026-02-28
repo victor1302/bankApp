@@ -18,5 +18,7 @@ public interface UserRepository extends JpaRepository<User, UUID> {
 
     Page<UserProjection> findAllBy(Pageable pageable);
 
+    Optional<UserProjection> findProjectedByUserId(UUID id);
+
     Optional<User> findByEmail(String email);
 }
