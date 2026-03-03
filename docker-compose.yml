@@ -1,7 +1,17 @@
 services:
+  app:
+    build: .
+    container_name: bank_app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - postgres
+    env_file:
+      - .env
   postgres:
     env_file:
       - .env
+
     image: postgres:16
     container_name: postgres_db_bankApp
     restart: unless-stopped

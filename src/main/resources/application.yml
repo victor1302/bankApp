@@ -3,7 +3,8 @@ spring:
     name: bankApp
 
   datasource:
-    url: ${SPRING_DATABASE_URL:jdbc:postgresql://localhost:5432/bankapp}
+    #if you're using docker you have to change 'localhost:5432' to 'postgres:5432'. docker compose name.
+    url: ${SPRING_DATABASE_URL:jdbc:postgresql://postgres:5432/bankapp}
     username: ${SPRING_DATABASE_USERNAME:postgres}
     password: ${SPRING_DATABASE_PASSWORD:admin}
     driver-class-name: org.postgresql.Driver
