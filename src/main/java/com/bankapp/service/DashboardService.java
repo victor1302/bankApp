@@ -2,10 +2,10 @@ package com.bankapp.service;
 
 import com.bankapp.dto.dashboard.DashboardResponse;
 import com.bankapp.entity.User;
-import com.bankapp.interfaces.AccountProjection;
+import com.bankapp.exception.BusinessValidationException;
+import com.bankapp.exception.UserNotFoundException;
 import com.bankapp.interfaces.CardProjection;
 import com.bankapp.interfaces.UserProjection;
-import com.bankapp.repository.AccountRepository;
 import com.bankapp.repository.CardRepository;
 import com.bankapp.repository.UserRepository;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -29,9 +29,9 @@ public class DashboardService {
 
 
         UserProjection userProjection = userRepository.findProjectedByUserId(user.getUserId())
-                .orElseThrow(() -> new RuntimeException("User not found"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
         CardProjection cardProjection = cardRepository.findProjectionByCardId(user.getUserAccount().getCardAccount().getCardId())
-                .orElseThrow(() -> new RuntimeException("Card not found"));
+                .orElseThrow(() -> new BusinessValidationException("Card not found"));
 
 
 

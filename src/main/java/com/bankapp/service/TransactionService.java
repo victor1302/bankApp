@@ -7,14 +7,11 @@ import com.bankapp.dto.LedgerEntry.InvoiceResponseDto;
 import com.bankapp.dto.LedgerEntry.PixResonseDto;
 import com.bankapp.dto.Transaction.*;
 import com.bankapp.entity.*;
-import com.bankapp.entity.enums.InvoiceStatus;
 import com.bankapp.entity.enums.TransactionStatus;
 import com.bankapp.entity.enums.TransactionType;
-import com.bankapp.exception.AccountDontHaveEnoughMoney;
-import com.bankapp.exception.UserOrAccountDisabled;
+import com.bankapp.exception.*;
 import com.bankapp.interfaces.TransactionProjection;
 import com.bankapp.repository.AccountRepository;
-import com.bankapp.repository.InvoiceRepository;
 import com.bankapp.repository.TransactionRepository;
 import com.bankapp.repository.UserRepository;
 import org.springframework.data.domain.Page;
@@ -23,9 +20,9 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.lang.reflect.Type;
 import java.math.BigDecimal;
-import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 
 @Service
 public class TransactionService {
@@ -137,15 +134,15 @@ public class TransactionService {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         User sourceUser = userRepository.findByEmail(user.getEmail())
-                .orElseThrow(() -> new RuntimeException("User not found!"));
+                .orElseThrow(() -> new UserNotFoundException("User not found"));
 
         Account sourceAccount = accountRepository.findById(sourceUser.getUserAccount().getAccountId())
-                .orElseThrow(() -> new RuntimeException("Source account not found!"));
+                .orElseThrow(() -> new AccountNotFoundException("Source account not found"));
 
         Account destinationAccount = null;
         if(destinationAccountIdOrNull != null){
             destinationAccount = accountRepository.findById(destinationAccountIdOrNull)
-                    .orElseThrow(() -> new RuntimeException("Destination account not found"));
+                    .orElseThrow(() -> new AccountNotFoundException("Destination account not found"));
         }
 
         validateByType(transactionType, amount, sourceAccount, destinationAccount, sourceUser);
@@ -171,20 +168,20 @@ public class TransactionService {
         if (!sourceAccount.isActive()) {
             throw new UserOrAccountDisabled("Source account do not exists or disabled");
         }
-        if(sourceAccount.getUserAccount().getUserId().equals(destinationAccount.getUserAccount().getUserId())){
-            throw new RuntimeException("You cant make a transaction for yourself");
+        if(destinationAccount != null && sourceAccount.getUserAccount().getUserId().equals(destinationAccount.getUserAccount().getUserId())){
+            throw new SelfTransferNotAllowedException("You can't make a transaction for yourself");
         }
 
         switch (transactionType) {
             case PIX_TRANSFER -> {
                 if (destinationAccount == null) {
-                    throw new RuntimeException("Destination account is required for PIX_TRANSFER");
+                    throw new DestinationAccountRequiredException("Destination account is required for PIX_TRANSFER");
                 }
                 if (!destinationAccount.isActive()) {
                     throw new UserOrAccountDisabled("Destination account do not exists or disabled");
                 }
                 if (sourceAccount.getAccountId().equals(destinationAccount.getAccountId())) {
-                    throw new RuntimeException("You can't send money to yourself");
+                    throw new SelfTransferNotAllowedException("You can't send money to yourself");
                 }
                 if (sourceAccount.getCachedBalance().compareTo(amount) < 0) {
                     throw new AccountDontHaveEnoughMoney("Account don't have enough money!");
@@ -192,7 +189,7 @@ public class TransactionService {
             }
             case CREDIT_PURCHASE -> {
                 if (destinationAccount == null) {
-                    throw new RuntimeException("Destination account is required for CREDIT_PURCHASE");
+                    throw new DestinationAccountRequiredException("Destination account is required for CREDIT_PURCHASE");
                 }
                 if (!destinationAccount.isActive()) {
                     throw new UserOrAccountDisabled("Destination account do not exists or disabled");
@@ -200,7 +197,7 @@ public class TransactionService {
             }
             case INVOICE_PAYMENT -> {
                 if (destinationAccount != null) {
-                    throw new RuntimeException(transactionType + " must not have destination account");
+                    throw new BusinessValidationException(transactionType + " must not have destination account");
                 }
                 if (sourceAccount.getCachedBalance().compareTo(amount) < 0) {
                     throw new AccountDontHaveEnoughMoney("Account don't have enough money!");
@@ -208,7 +205,7 @@ public class TransactionService {
             }
             case DEPOSIT -> {
                 if (destinationAccount == null) {
-                    throw new RuntimeException("Destination account is required for DEPOSIT");
+                    throw new DestinationAccountRequiredException("Destination account is required for DEPOSIT");
                 }
                 if (!destinationAccount.isActive()) {
                     throw new UserOrAccountDisabled("Destination account do not exists or disabled");
@@ -248,5 +245,18 @@ public class TransactionService {
     @Transactional(readOnly = true)
     public Page<TransactionProjection> getTransactions(Pageable pageable){
         return transactionRepository.findAllBy(pageable);
+    }
+    @Transactional(readOnly = true)
+    public Map<String, Page<TransactionProjection>> getTransactionByUser(Long accountId, Pageable pageable){
+        Page<TransactionProjection> sentTransaction = transactionRepository.findTransactionBySourceAccount_accountId(
+                accountId, pageable
+        );
+        Page<TransactionProjection> receivedTransaction = transactionRepository.findByDestinationAccount_AccountId(
+               accountId, pageable
+        );
+        Map<String, Page<TransactionProjection>> result = new HashMap<>();
+        result.put("sent", sentTransaction);
+        result.put("received", receivedTransaction);
+        return result;
     }
 }

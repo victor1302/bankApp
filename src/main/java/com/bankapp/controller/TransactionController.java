@@ -6,17 +6,21 @@ import com.bankapp.service.TransactionService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/v1")
-public class TreansactionController {
+public class TransactionController {
 
     private final TransactionService transactionService;
 
-    public TreansactionController(TransactionService transactionService) {
+    public TransactionController(TransactionService transactionService) {
         this.transactionService = transactionService;
     }
 
@@ -46,5 +50,13 @@ public class TreansactionController {
     public ResponseEntity<PayInvoiceResponse> payFullInvoice(@PathVariable Long id){
         PayInvoiceResponse response = transactionService.payFullInvoice(id);
         return ResponseEntity.ok(response);
+    }
+    @GetMapping("/transactions/{accountId}")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_BASIC')")
+    public ResponseEntity<Map<String, Page<TransactionProjection>>> getTransactionByUser(@PathVariable Long accountId,
+                                                                                         @PageableDefault(size = 5, sort = "transactionId",
+    direction = Sort.Direction.DESC) Pageable pageable){
+        Map<String, Page<TransactionProjection>> transactions = transactionService.getTransactionByUser(accountId,pageable);
+        return ResponseEntity.ok(transactions);
     }
 }

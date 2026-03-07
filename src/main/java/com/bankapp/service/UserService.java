@@ -7,6 +7,7 @@ import com.bankapp.entity.User;
 import com.bankapp.entity.enums.UserType;
 import com.bankapp.exception.AlreadyExistsException;
 import com.bankapp.exception.AlreadyDisabledOrNotPresent;
+import com.bankapp.exception.AuthException;
 import com.bankapp.interfaces.UserProjection;
 import com.bankapp.repository.RoleRepository;
 import com.bankapp.repository.UserRepository;
@@ -37,7 +38,8 @@ public class UserService {
     }
 
     public LoginResponseDto loginUser(LoginRequestDto loginRequestDto){
-        User user = this.userRepository.findByEmail(loginRequestDto.email()).orElseThrow(() -> new RuntimeException("Credentials Invalid"));
+        User user = this.userRepository.findByEmail(loginRequestDto.email())
+                .orElseThrow(() -> new AuthException("Invalid credentials"));
         if(!user.isActive()){
             throw new AlreadyExistsException("User is disabled or not exists");
         }
@@ -45,7 +47,7 @@ public class UserService {
             String token = this.tokenService.generateToken(user);
             return new LoginResponseDto(user.getEmail(), token);
         }
-        throw new RuntimeException("Invalid credentials");
+        throw new AuthException("Invalid credentials");
     }
 
 

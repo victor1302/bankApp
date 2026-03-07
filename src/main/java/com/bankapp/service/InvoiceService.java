@@ -3,10 +3,12 @@ package com.bankapp.service;
 import com.bankapp.dto.Invoice.CreateInvoiceResponseDto;
 import com.bankapp.dto.Invoice.CreateInvoiceRequestDto;
 import com.bankapp.dto.LedgerEntry.InvoiceResponseDto;
-import com.bankapp.dto.Transaction.PayInvoiceResponse;
 import com.bankapp.entity.*;
 import com.bankapp.entity.enums.InvoiceStatus;
 import com.bankapp.entity.enums.TransactionStatus;
+import com.bankapp.exception.AccountNotFoundException;
+import com.bankapp.exception.BusinessValidationException;
+import com.bankapp.exception.InvoiceNotFoundException;
 import com.bankapp.repository.*;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
@@ -37,16 +39,16 @@ public class InvoiceService {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Account sourceAccount = accountRepository.findById(user.getUserAccount().getAccountId()).
-                orElseThrow( () -> new RuntimeException("Not found source account"));
+                orElseThrow( () -> new AccountNotFoundException("Not found source account"));
 
         if(sourceAccount.getCardAccount() != null && sourceAccount.getCardAccount().isBlocked()){
-            throw new RuntimeException("Account don't have a card or is blocked");
+            throw new BusinessValidationException("Account don't have a card or is blocked");
         }
         Card sourceAccountCard = sourceAccount.getCardAccount();
 
         if(sourceAccountCard.getAvailableLimit().compareTo(crateInvoiceRequestDto.totalAmount()) < 0
                 || crateInvoiceRequestDto.totalAmount().signum() < 0){
-            throw new RuntimeException("You don't have sufficient limit available");
+            throw new BusinessValidationException("You don't have sufficient limit available");
         }
 
         YearMonth yearMonth = YearMonth.now();
@@ -78,16 +80,16 @@ public class InvoiceService {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
 
         Account sourceAccount = accountRepository.findById(user.getUserAccount().getAccountId()).
-                orElseThrow( () -> new RuntimeException("Not found source account"));
+                orElseThrow( () -> new AccountNotFoundException("Not found source account"));
 
         Invoice invoice = invoceRepository.findById(invoiceId)
-                .orElseThrow(() -> new RuntimeException("Not found the invoice"));
+                .orElseThrow(() -> new InvoiceNotFoundException("Not found the invoice"));
 
         if(!invoice.getCreditCard().getCardAccount().equals(sourceAccount)){
-            throw new RuntimeException("You can't pay one invoice that does not belong to you!");
+            throw new BusinessValidationException("You can't pay one invoice that does not belong to you!");
         }
         if(!InvoiceStatus.OPEN.equals(invoice.getStatus())){
-            throw new RuntimeException("You cant pay this invoice");
+            throw new BusinessValidationException("You cant pay this invoice");
         }
 
         invoice.setAmountPaid(invoice.getTotalAmount());
