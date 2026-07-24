@@ -60,7 +60,7 @@ public class CardService {
         newCard.setAvailableLimit(BigDecimal.valueOf(1000));
         account.setCardAccount(newCard);
         cardRepository.save(newCard);
-        return new CardCreateResponseDto(newCard.getPan(), newCard.getCvv(), newCard.getExpiry());
+        return new CardCreateResponseDto(newCard.getPan(), newCard.getExpiry());
 
     }
 }
