@@ -7,6 +7,10 @@ import com.bankapp.entity.Installment;
 import com.bankapp.entity.Invoice;
 import com.bankapp.entity.User;
 import com.bankapp.entity.enums.InvoiceStatus;
+import com.bankapp.exception.AccountDontHaveEnoughMoney;
+import com.bankapp.exception.BusinessValidationException;
+import com.bankapp.exception.InstallmentNotFoundException;
+import com.bankapp.exception.InvoiceNotFoundException;
 import com.bankapp.repository.CardRepository;
 import com.bankapp.repository.InstallmentRepository;
 import com.bankapp.repository.InvoiceRepository;
@@ -18,9 +22,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.time.ZonedDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -47,26 +49,26 @@ public class InstallmentService {
         User sourceUser = userRepository.findByEmail(user.getEmail()).
                 orElseThrow();
         Invoice invoice = invoiceRepository.findById(payInstallmentRequestDto.invoiceId())
-                .orElseThrow( () -> new RuntimeException("dont found invoice"));
+                .orElseThrow( () -> new InvoiceNotFoundException("Invoice not found"));
 
         Installment installmentToPay = installmentRepository.findById(payInstallmentRequestDto.installmentId())
-                .orElseThrow( () -> new RuntimeException("dont found installment"));
+                .orElseThrow( () -> new InstallmentNotFoundException("Installment not found"));
 
         Card cardUser = sourceUser.getUserAccount().getCardAccount();
 
 
         if(!(sourceUser.getUserAccount().getCardAccount().getCardId().equals(invoice.getCreditCard().getCardId()))){
-            throw new RuntimeException("You cant pay others installments");
+            throw new BusinessValidationException("You cant pay others installments");
         }
 
         if(sourceUser.getUserAccount().getCachedBalance().compareTo(installmentToPay.getAmount()) < 0){
-            throw new RuntimeException("You don't have money to pay this installment");
+            throw new AccountDontHaveEnoughMoney("You don't have money to pay this installment");
         }
         if (!installmentToPay.getInvoice().getInvoiceId().equals(invoice.getInvoiceId())) {
-            throw new RuntimeException("Installment does not belong to this invoice");
+            throw new BusinessValidationException("Installment does not belong to this invoice");
         }
         if(installmentToPay.isPaid()){
-            throw new RuntimeException("Installment is already paid!");
+            throw new BusinessValidationException("Installment is already paid!");
         }
         if(installmentToPay.getInstallmentNumber() == invoice.getInstallmentCount()){
             invoice.setStatus(InvoiceStatus.PAID);

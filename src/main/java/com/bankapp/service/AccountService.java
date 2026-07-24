@@ -6,8 +6,11 @@ import com.bankapp.entity.User;
 import com.bankapp.entity.enums.UserType;
 import com.bankapp.exception.AlreadyDisabledOrNotPresent;
 import com.bankapp.exception.AlreadyExistsException;
+import com.bankapp.interfaces.AccountProjection;
 import com.bankapp.repository.AccountRepository;
 import com.bankapp.repository.UserRepository;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -58,5 +61,11 @@ public class AccountService {
                     return accountRepository.save(account);
                 }).orElseThrow(()-> new AlreadyExistsException("Account not present or already exists"));
     }
+
+    @Transactional
+    public Page<AccountProjection> getAccounts(Pageable pageable){
+        return accountRepository.findAllBy(pageable);
+    }
+
 
 }

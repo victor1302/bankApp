@@ -7,6 +7,7 @@ import com.bankapp.entity.User;
 import com.bankapp.entity.enums.UserType;
 import com.bankapp.exception.AlreadyExistsException;
 import com.bankapp.exception.AlreadyDisabledOrNotPresent;
+import com.bankapp.exception.AuthException;
 import com.bankapp.interfaces.UserProjection;
 import com.bankapp.repository.RoleRepository;
 import com.bankapp.repository.UserRepository;
@@ -37,7 +38,8 @@ public class UserService {
     }
 
     public LoginResponseDto loginUser(LoginRequestDto loginRequestDto){
-        User user = this.userRepository.findByEmail(loginRequestDto.email()).orElseThrow(() -> new RuntimeException("Credentials Invalid"));
+        User user = this.userRepository.findByEmail(loginRequestDto.email())
+                .orElseThrow(() -> new AuthException("Invalid credentials"));
         if(!user.isActive()){
             throw new AlreadyExistsException("User is disabled or not exists");
         }
@@ -45,12 +47,12 @@ public class UserService {
             String token = this.tokenService.generateToken(user);
             return new LoginResponseDto(user.getEmail(), token);
         }
-        throw new RuntimeException("Invalid credentials");
+        throw new AuthException("Invalid credentials");
     }
 
 
     @Transactional
-    public User createUser(String username, String password, String phoneNumber, String address, int age, String email, UserType userType){
+    public void createUser(String username, String password, String phoneNumber, String address, int age, String email, UserType userType){
         var basicRole = roleRepository.findByName(Role.Values.BASIC.name());
 
         if(userRepository.existsByUsername(username)){
@@ -66,26 +68,24 @@ public class UserService {
         user.setActive(true);
         user.setUserType(userType);
         user.setUserRole(Set.of(basicRole));
-        return userRepository.save(user);
+        userRepository.save(user);
     }
-
-
 
     @Transactional
     public Page<UserProjection> getUsers(Pageable pageable){
         return userRepository.findAllBy(pageable);
     }
     @Transactional
-    public User disableUser(UUID userId){
-        return userRepository.findById(userId)
-                .map(user ->{
-                    if(!user.isActive() || user.getUserAccount().isActive()){
+    public void disableUser(UUID userId){
+        userRepository.findById(userId)
+                .map(user -> {
+                    if (!user.isActive() || user.getUserAccount().isActive()) {
                         throw new AlreadyDisabledOrNotPresent("User not present or already disabled or have an active account");
                     }
                     user.setActive(false);
                     return userRepository.save(user);
                 })
-                .orElseThrow(()-> new AlreadyDisabledOrNotPresent("User not present or already disabled"));
+                .orElseThrow(() -> new AlreadyDisabledOrNotPresent("User not present or already disabled"));
     }
 
 

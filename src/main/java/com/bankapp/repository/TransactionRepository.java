@@ -12,4 +12,6 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long> 
 
     Page<TransactionProjection> findAllBy(Pageable pageable);
 
+    Page<TransactionProjection> findTransactionBySourceAccount_accountId(Long sourceAccountId, Pageable pageable);
+    Page<TransactionProjection> findByDestinationAccount_AccountId(Long accountId, Pageable pageable);
 }
