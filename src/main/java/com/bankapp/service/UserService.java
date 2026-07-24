@@ -14,10 +14,14 @@ import com.bankapp.repository.UserRepository;
 import com.bankapp.security.TokenService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 
@@ -74,6 +78,13 @@ public class UserService {
     @Transactional
     public Page<UserProjection> getUsers(Pageable pageable){
         return userRepository.findAllBy(pageable);
+    }
+    public Optional<UserProjection> getCurrentUser(){
+        User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+
+        Optional<UserProjection> userProjection = userRepository.findProjectedByUserId(user.getUserId());
+
+        return userProjection;
     }
     @Transactional
     public void disableUser(UUID userId){
