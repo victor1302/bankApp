@@ -3,6 +3,7 @@ package com.bankapp.data;
 import com.bankapp.entity.Account;
 import com.bankapp.entity.Role;
 import com.bankapp.entity.User;
+import com.bankapp.entity.enums.AccountType;
 import com.bankapp.repository.AccountRepository;
 import com.bankapp.repository.RoleRepository;
 import com.bankapp.repository.UserRepository;
@@ -67,6 +68,7 @@ public class DataInitializer implements CommandLineRunner {
 
                     var account = new Account(user, 0);
                     account.setUserAccount(user);
+                    account.setAccountType(AccountType.PERSONAL);
                     account.setCachedBalance(BigDecimal.valueOf(999999999));
                     account.setAccountNumber(0);
                     account.setActive(true);

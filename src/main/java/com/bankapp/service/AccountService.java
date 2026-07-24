@@ -1,5 +1,6 @@
 package com.bankapp.service;
 
+import com.bankapp.dto.Account.CreateAccountRequest;
 import com.bankapp.dto.Account.CreateAccountResponseDto;
 import com.bankapp.entity.Account;
 import com.bankapp.entity.User;
@@ -29,14 +30,16 @@ public class AccountService {
     }
 
     @Transactional
-    public CreateAccountResponseDto createAccount(){
+    public CreateAccountResponseDto createAccount(CreateAccountRequest createAccountRequest){
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         user = userRepository.findByEmail(user.getEmail()).orElseThrow();
         Integer lastAccountNumber = accountRepository.findMaxAccountNumber();
         int newAccountNumber = (lastAccountNumber != null) ? lastAccountNumber + 1 : 1;
         Account newAccount = new Account(user, newAccountNumber);
+        newAccount.setAccountType(createAccountRequest.accountType());
         user.setUserAccount(newAccount);
         updateBalanceByType(user.getUserType(), newAccount);
+
         return new CreateAccountResponseDto(newAccount.getAccountNumber(), newAccount.getCachedBalance());
     }
 

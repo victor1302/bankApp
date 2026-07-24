@@ -17,6 +17,8 @@ public class Account {
     private Long accountId;
     private int accountNumber;
     private BigDecimal cachedBalance;
+    @Column(length = 14, unique = true, nullable = true)
+    private String documentNumber;
     private boolean isActive;
     @CreationTimestamp
     private Instant creationTimestamp;
@@ -34,7 +36,6 @@ public class Account {
     }
 
     public Account(User userAccount, int accountNumber){
-        this.accountType = AccountType.USER;
         this.userAccount = userAccount;
         this.accountNumber = accountNumber;
         this.cachedBalance = BigDecimal.ZERO;

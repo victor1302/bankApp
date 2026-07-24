@@ -1,5 +1,6 @@
 package com.bankapp.controller;
 
+import com.bankapp.dto.Account.CreateAccountRequest;
 import com.bankapp.dto.Account.CreateAccountResponseDto;
 import com.bankapp.entity.Account;
 import com.bankapp.interfaces.AccountProjection;
@@ -26,8 +27,8 @@ public class AccountController {
 
     @PostMapping("/account")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_BASIC')")
-    public ResponseEntity<CreateAccountResponseDto> createAccount(){
-        CreateAccountResponseDto createAccountResponseDto = accountService.createAccount();
+    public ResponseEntity<CreateAccountResponseDto> createAccount(@RequestParam CreateAccountRequest createAccountRequest){
+        CreateAccountResponseDto createAccountResponseDto = accountService.createAccount(createAccountRequest);
         return ResponseEntity.ok(createAccountResponseDto);
     }
     @PutMapping("/account/disable/{accountId}")
