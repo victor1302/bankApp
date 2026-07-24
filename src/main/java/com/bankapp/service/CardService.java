@@ -5,6 +5,7 @@ import com.bankapp.dto.Card.CardCreateResponseDto;
 import com.bankapp.entity.Account;
 import com.bankapp.entity.Card;
 import com.bankapp.entity.User;
+import com.bankapp.exception.AccountNotFoundException;
 import com.bankapp.repository.AccountRepository;
 import com.bankapp.repository.CardRepository;
 import com.bankapp.repository.UserRepository;
@@ -36,7 +37,10 @@ public class CardService {
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         user = userRepository.findByEmail(user.getEmail()).orElseThrow(() -> new RuntimeException("User not found"));
 
-        Account account = accountRepository.findById(user.getUserAccount().getAccountId()).orElseThrow();
+        Account account = user.getUserAccount();
+        if(account == null){
+            throw new AccountNotFoundException("User account not found");
+        }
 
         Faker faker = new Faker();
 
