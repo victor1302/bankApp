@@ -1,10 +1,7 @@
 package com.bankapp.controller;
 
-import com.bankapp.dto.Account.CreateAccountRequest;
 import com.bankapp.dto.Account.CreateAccountResponseDto;
-import com.bankapp.entity.Account;
 import com.bankapp.interfaces.AccountProjection;
-import com.bankapp.repository.AccountRepository;
 import com.bankapp.service.AccountService;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,8 +24,8 @@ public class AccountController {
 
     @PostMapping("/account")
     @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_BASIC')")
-    public ResponseEntity<CreateAccountResponseDto> createAccount(@RequestParam CreateAccountRequest createAccountRequest){
-        CreateAccountResponseDto createAccountResponseDto = accountService.createAccount(createAccountRequest);
+    public ResponseEntity<CreateAccountResponseDto> createAccount(){
+        CreateAccountResponseDto createAccountResponseDto = accountService.createAccount();
         return ResponseEntity.ok(createAccountResponseDto);
     }
     @PutMapping("/account/disable/{accountId}")

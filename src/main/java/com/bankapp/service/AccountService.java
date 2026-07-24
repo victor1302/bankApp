@@ -1,9 +1,9 @@
 package com.bankapp.service;
 
-import com.bankapp.dto.Account.CreateAccountRequest;
 import com.bankapp.dto.Account.CreateAccountResponseDto;
 import com.bankapp.entity.Account;
 import com.bankapp.entity.User;
+import com.bankapp.entity.enums.AccountType;
 import com.bankapp.entity.enums.UserType;
 import com.bankapp.exception.AlreadyDisabledOrNotPresent;
 import com.bankapp.exception.AlreadyExistsException;
@@ -30,13 +30,15 @@ public class AccountService {
     }
 
     @Transactional
-    public CreateAccountResponseDto createAccount(CreateAccountRequest createAccountRequest){
+    public CreateAccountResponseDto createAccount(){
         User user = (User) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
         user = userRepository.findByEmail(user.getEmail()).orElseThrow();
         Integer lastAccountNumber = accountRepository.findMaxAccountNumber();
         int newAccountNumber = (lastAccountNumber != null) ? lastAccountNumber + 1 : 1;
         Account newAccount = new Account(user, newAccountNumber);
-        newAccount.setAccountType(createAccountRequest.accountType());
+        //Account type
+        AccountType accountType = user.getUserType() == UserType.SELLER ? AccountType.MERCHANT : AccountType.PERSONAL;
+        newAccount.setAccountType(accountType);
         user.setUserAccount(newAccount);
         updateBalanceByType(user.getUserType(), newAccount);
 
