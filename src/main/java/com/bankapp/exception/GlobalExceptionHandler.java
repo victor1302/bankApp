@@ -51,6 +51,7 @@ public class GlobalExceptionHandler{
             AccountDontHaveEnoughMoney.class,
             DestinationAccountRequiredException.class,
             SelfTransferNotAllowedException.class,
+            DestinationAccountCantReceiveException.class,
             BusinessValidationException.class})
     public ResponseEntity<Map<String, Object>> handleBusiness(RuntimeException ex){
         HttpStatus status = HttpStatus.BAD_REQUEST;

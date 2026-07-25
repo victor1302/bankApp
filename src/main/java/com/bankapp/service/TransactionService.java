@@ -7,6 +7,7 @@ import com.bankapp.dto.LedgerEntry.InvoiceResponseDto;
 import com.bankapp.dto.LedgerEntry.PixResonseDto;
 import com.bankapp.dto.Transaction.*;
 import com.bankapp.entity.*;
+import com.bankapp.entity.enums.AccountType;
 import com.bankapp.entity.enums.TransactionStatus;
 import com.bankapp.entity.enums.TransactionType;
 import com.bankapp.exception.*;
@@ -98,7 +99,6 @@ public class TransactionService {
 
     @Transactional
     public PayInvoiceResponse payFullInvoice(Long invoiceId){
-
         InvoiceResponseDto invoiceResponseDto = invoiceService.payInvoice(invoiceId);
         Transaction transaction = createAndVerifyTransaction(
                 TransactionType.INVOICE_PAYMENT,
@@ -186,6 +186,9 @@ public class TransactionService {
                 if (sourceAccount.getCachedBalance().compareTo(amount) < 0) {
                     throw new AccountDontHaveEnoughMoney("Account don't have enough money!");
                 }
+                if(!destinationAccount.getAccountType().equals(AccountType.PERSONAL)){
+                    throw new DestinationAccountCantReceiveException("Seller account can't receive this type of transaction");
+                }
             }
             case CREDIT_PURCHASE -> {
                 if (destinationAccount == null) {
@@ -209,6 +212,9 @@ public class TransactionService {
                 }
                 if (!destinationAccount.isActive()) {
                     throw new UserOrAccountDisabled("Destination account do not exists or disabled");
+                }
+                if(!destinationAccount.getAccountType().equals(AccountType.PERSONAL)){
+                    throw new DestinationAccountCantReceiveException("Seller account can't receive this type of transaction");
                 }
             }
 
