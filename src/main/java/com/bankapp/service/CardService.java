@@ -5,6 +5,7 @@ import com.bankapp.dto.Card.CardCreateResponseDto;
 import com.bankapp.entity.Account;
 import com.bankapp.entity.Card;
 import com.bankapp.entity.User;
+import com.bankapp.entity.enums.AccountType;
 import com.bankapp.exception.AccountNotFoundException;
 import com.bankapp.repository.AccountRepository;
 import com.bankapp.repository.CardRepository;
@@ -60,11 +61,22 @@ public class CardService {
         newCard.setExpiry(expiry);
         newCard.setCardAccount(account);
         newCard.setBlocked(false);
-        newCard.setCreditLimit(BigDecimal.valueOf(1000));
-        newCard.setAvailableLimit(BigDecimal.valueOf(1000));
+        updateLimitByAccountType(newCard, account.getAccountType());
         account.setCardAccount(newCard);
         cardRepository.save(newCard);
         return new CardCreateResponseDto(newCard.getPan(), newCard.getExpiry());
+    }
 
+    protected void updateLimitByAccountType(Card newCard, AccountType accountType){
+        switch (accountType){
+            case MERCHANT -> {
+                newCard.setCreditLimit(BigDecimal.ZERO);
+                newCard.setAvailableLimit(BigDecimal.ZERO);
+            }
+            case PERSONAL -> {
+                newCard.setCreditLimit(BigDecimal.valueOf(1000));
+                newCard.setAvailableLimit(BigDecimal.valueOf(1000));
+            }
+        }
     }
 }

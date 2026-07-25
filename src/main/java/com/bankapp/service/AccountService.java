@@ -36,7 +36,6 @@ public class AccountService {
         Integer lastAccountNumber = accountRepository.findMaxAccountNumber();
         int newAccountNumber = (lastAccountNumber != null) ? lastAccountNumber + 1 : 1;
         Account newAccount = new Account(user, newAccountNumber);
-        //Account type
         AccountType accountType = user.getUserType() == UserType.SELLER ? AccountType.MERCHANT : AccountType.PERSONAL;
         newAccount.setAccountType(accountType);
         user.setUserAccount(newAccount);
@@ -55,6 +54,7 @@ public class AccountService {
             }
         }
     }
+
     @Transactional
     public Account disableAccount(Long accountId){
         return accountRepository.findById(accountId)

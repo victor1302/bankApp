@@ -18,7 +18,6 @@ public class Account {
     private int accountNumber;
     private BigDecimal cachedBalance;
     @Column(length = 14, unique = true, nullable = true)
-    private String documentNumber;
     private boolean isActive;
     @CreationTimestamp
     private Instant creationTimestamp;
