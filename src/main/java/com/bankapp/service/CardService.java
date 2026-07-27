@@ -51,6 +51,7 @@ public class CardService {
         YearMonth expiryYM = YearMonth.now().plusMonths(new Random().nextInt(60) + 1);
         String expiry = String.format("%02d/%02d", expiryYM.getMonthValue(), expiryYM.getYear() % 100);
 
+
         if(!LuhnAlgorithm.validateLuhn(pan)){
             throw new IllegalStateException("Fail to generate credit card(Luhn)");
         }
@@ -61,6 +62,7 @@ public class CardService {
         newCard.setExpiry(expiry);
         newCard.setCardAccount(account);
         newCard.setBlocked(false);
+        newCard.setInvoiceDueDay(5);
         updateLimitByAccountType(newCard, account.getAccountType());
         account.setCardAccount(newCard);
         cardRepository.save(newCard);

@@ -16,6 +16,7 @@ import com.bankapp.repository.CardRepository;
 import com.bankapp.repository.InstallmentRepository;
 import com.bankapp.repository.InvoiceRepository;
 import com.bankapp.repository.UserRepository;
+import org.springframework.cglib.core.Local;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -23,6 +24,8 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.time.YearMonth;
 import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -85,7 +88,8 @@ public class InstallmentService {
     }
 
     @Transactional
-    public List<Installment> createInstallments(Invoice invoice){
+    public List<Installment> createInstallments(Invoice invoice, int cardDueDay){
+        LocalDate firstDueDate = calculateFirstDueDate(LocalDate.now(), cardDueDay);
         List<Installment> listInstallment = new ArrayList<>();
         for(int i = 0; i < invoice.getInstallmentCount(); i++){
             Installment newInstallment = new Installment();
@@ -93,12 +97,25 @@ public class InstallmentService {
             newInstallment.setPaid(false);
             newInstallment.setInvoice(invoice);
             newInstallment.setInstallmentNumber(i + 1);
-            Instant dueDate = ZonedDateTime.now().plusMonths(i+1).toInstant();
-            newInstallment.setDueDate(dueDate);
+            LocalDate installmentDueDate = firstDueDate.plusMonths(i);
+            newInstallment.setDueDate(installmentDueDate);
             listInstallment.add(newInstallment);
         }
         return listInstallment;
 
+    }
+
+    public LocalDate calculateFirstDueDate(LocalDate purchaseDate, int dueDay){
+        YearMonth currentMonth = YearMonth.from(purchaseDate);
+
+        int validDay = Math.min(dueDay, currentMonth.lengthOfMonth());
+        LocalDate dueDateThisMonth = currentMonth.atDay(validDay);
+        if(purchaseDate.isBefore(dueDateThisMonth)){
+            return dueDateThisMonth;
+        }
+        YearMonth nextMonth = currentMonth.plusMonths(1);
+        int nextValidDay = Math.min(dueDay, nextMonth.lengthOfMonth());
+        return nextMonth.atDay(nextValidDay);
     }
 
 }

@@ -62,7 +62,7 @@ public class InvoiceService {
         newInvoice.setDescription(crateInvoiceRequestDto.description());
         newInvoice.setClosingDate(null);
         newInvoice.setCreditCard(sourceAccountCard);
-        newInvoice.setInstallments(installmentService.createInstallments(newInvoice));
+        newInvoice.setInstallments(installmentService.createInstallments(newInvoice, sourceAccountCard.getInvoiceDueDay()));
 
         if(sourceAccountCard.getCardInvoice() == null){
             sourceAccountCard.setCardInvoice(new ArrayList<>());

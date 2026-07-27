@@ -19,8 +19,12 @@ public class Card {
     private String pan;
     private String cvv;
     private String expiry;
+    @Column(nullable = false)
     private BigDecimal creditLimit;
+    @Column(nullable = false)
     private BigDecimal availableLimit;
+    @Column(nullable = false)
+    private Integer invoiceDueDay;
     private boolean isBlocked;
 
     @OneToMany(mappedBy = "invoiceId", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -56,6 +60,13 @@ public class Card {
         this.cvv = cvv;
     }
 
+    public Integer getInvoiceDueDay() {
+        return invoiceDueDay;
+    }
+
+    public void setInvoiceDueDay(Integer invoiceDueDay) {
+        this.invoiceDueDay = invoiceDueDay;
+    }
 
     public String getExpiry() {
         return expiry;
