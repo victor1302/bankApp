@@ -1,5 +1,7 @@
 package com.bankapp.service;
 
+import com.bankapp.dto.Installments.LedgerInstallmentResponse;
+import com.bankapp.dto.Installments.PayInstallmentResponseDto;
 import com.bankapp.dto.LedgerEntry.CreditResponseDto;
 import com.bankapp.dto.LedgerEntry.InvoiceResponseDto;
 import com.bankapp.dto.LedgerEntry.PixResonseDto;
@@ -17,11 +19,9 @@ import java.math.BigDecimal;
 @Service
 public class LedgerService {
     private final LedgerRepository ledgerRepository;
-    private final AccountRepository accountRepository;
 
-    public LedgerService(LedgerRepository ledgerRepository, AccountRepository accountRepository) {
+    public LedgerService(LedgerRepository ledgerRepository) {
         this.ledgerRepository = ledgerRepository;
-        this.accountRepository = accountRepository;
     }
 
     @Transactional
@@ -58,7 +58,7 @@ public class LedgerService {
                 EntryType.DEBIT,
                 ReferenceType.CARD_PURCHASE,
                 transaction.getTransactionId(),
-                "Credit card receivable"
+                "Credit card purchase"
         );
         createLedgerEntry(
                 transaction.getDestinationAccount().getAccountId(),
@@ -66,7 +66,7 @@ public class LedgerService {
                 EntryType.CREDIT,
                 ReferenceType.CARD_PURCHASE,
                 transaction.getTransactionId(),
-                "Credit card purchase"
+                "Credit card receivable"
         );
         return new CreditResponseDto(
                 transaction.getTransactionId(),
@@ -88,6 +88,24 @@ public class LedgerService {
                 "Paying invoice"
         );
         return new InvoiceResponseDto(
+                transaction.getTransactionId(),
+                transaction.getAmount(),
+                transaction.getStatus(),
+                transaction.getCreationTimestamp()
+        );
+    }
+
+    @Transactional
+    public PayInstallmentResponseDto createInstallmentLedger(Transaction transaction){
+        createLedgerEntry(
+                transaction.getSourceAccount().getAccountId(),
+                transaction.getAmount(),
+                EntryType.DEBIT,
+                ReferenceType.INSTALLMENT,
+                transaction.getTransactionId(),
+                "Paying installment"
+        );
+        return new PayInstallmentResponseDto(
                 transaction.getTransactionId(),
                 transaction.getAmount(),
                 transaction.getStatus(),

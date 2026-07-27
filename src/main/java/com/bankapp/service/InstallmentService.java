@@ -7,6 +7,7 @@ import com.bankapp.entity.Installment;
 import com.bankapp.entity.Invoice;
 import com.bankapp.entity.User;
 import com.bankapp.entity.enums.InvoiceStatus;
+import com.bankapp.entity.enums.TransactionStatus;
 import com.bankapp.exception.AccountDontHaveEnoughMoney;
 import com.bankapp.exception.BusinessValidationException;
 import com.bankapp.exception.InstallmentNotFoundException;
@@ -80,8 +81,7 @@ public class InstallmentService {
         invoice.setUpdatedAt(Instant.now());
         cardUser.setAvailableLimit(cardUser.getAvailableLimit().add(installmentToPay.getAmount()));
 
-
-        return new PayInstallmentResponseDto(true);
+        return new PayInstallmentResponseDto(installmentToPay.getInstallmentId(), installmentToPay.getAmount(), TransactionStatus.COMPLETED, installmentToPay.getPaymentDate());
     }
 
     @Transactional

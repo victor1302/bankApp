@@ -5,5 +5,5 @@ import com.bankapp.entity.enums.TransactionStatus;
 import java.math.BigDecimal;
 import java.time.Instant;
 
-public record PayInstallmentResponseDto(Long id, BigDecimal amount, TransactionStatus status, Instant createdAt) {
+public record LedgerInstallmentResponse(PayInstallmentResponseDto transferStatus) {
 }

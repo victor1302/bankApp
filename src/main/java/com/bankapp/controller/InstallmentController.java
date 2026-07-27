@@ -20,10 +20,4 @@ public class InstallmentController {
         this.installmentService = installmentService;
     }
 
-    @PostMapping("/installment")
-    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN', 'ROLE_BASIC')")
-    public ResponseEntity<PayInstallmentResponseDto> payInstallment(@RequestBody PayInstallmentRequestDto payInstallmentRequestDto){
-        PayInstallmentResponseDto payInstallmentResponseDto = installmentService.payInstallment(payInstallmentRequestDto);
-        return ResponseEntity.ok(payInstallmentResponseDto);
-    }
 }

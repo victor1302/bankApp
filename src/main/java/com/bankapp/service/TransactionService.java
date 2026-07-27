@@ -1,5 +1,8 @@
 package com.bankapp.service;
 
+import com.bankapp.dto.Installments.LedgerInstallmentResponse;
+import com.bankapp.dto.Installments.PayInstallmentRequestDto;
+import com.bankapp.dto.Installments.PayInstallmentResponseDto;
 import com.bankapp.dto.Invoice.CreateInvoiceRequestDto;
 import com.bankapp.dto.Invoice.CreateInvoiceResponseDto;
 import com.bankapp.dto.LedgerEntry.CreditResponseDto;
@@ -33,14 +36,16 @@ public class TransactionService {
     private final UserRepository userRepository;
     private final LedgerService ledgerService;
     private final InvoiceService invoiceService;
+    private final InstallmentService installmentService;
 
 
-    public TransactionService(TransactionRepository transactionRepository, UserRepository userRepository, AccountRepository accountRepository, LedgerService ledgerService, InvoiceService invoiceService) {
+    public TransactionService(TransactionRepository transactionRepository, UserRepository userRepository, AccountRepository accountRepository, LedgerService ledgerService, InvoiceService invoiceService, InstallmentService installmentService) {
         this.transactionRepository = transactionRepository;
         this.userRepository = userRepository;
         this.accountRepository = accountRepository;
         this.ledgerService = ledgerService;
         this.invoiceService = invoiceService;
+        this.installmentService = installmentService;
     }
 
     @Transactional
@@ -105,11 +110,27 @@ public class TransactionService {
                 invoiceResponseDto.amount(),
                 null
         );
-        InvoiceResponseDto ledgerEntry = ledgerService.createInvoiceLedger(transaction);
+        ledgerService.createInvoiceLedger(transaction);
         updateCachedBalance(transaction);
 
         return new PayInvoiceResponse(
                 invoiceResponseDto
+        );
+    }
+
+    @Transactional
+    public LedgerInstallmentResponse payInstallment(PayInstallmentRequestDto payInstallmentRequestDto){
+        PayInstallmentResponseDto payInstallmentResponse = installmentService.payInstallment(payInstallmentRequestDto);
+        Transaction transaction = createAndVerifyTransaction(
+                TransactionType.INSTALLMENT_PAYMENT,
+                payInstallmentResponse.amount(),
+                null
+        );
+        ledgerService.createInstallmentLedger(transaction);
+        updateCachedBalance(transaction);
+
+        return new LedgerInstallmentResponse(
+                payInstallmentResponse
         );
     }
 
@@ -189,6 +210,15 @@ public class TransactionService {
                 if(!destinationAccount.getAccountType().equals(AccountType.PERSONAL)){
                     throw new DestinationAccountCantReceiveException("Seller account can't receive this type of transaction");
                 }
+            }
+            case INSTALLMENT_PAYMENT -> {
+                if (sourceAccount.getCachedBalance().compareTo(amount) < 0) {
+                    throw new AccountDontHaveEnoughMoney("Account don't have enough money!");
+                }
+                if(!sourceAccount.getAccountType().equals(AccountType.PERSONAL)){
+                    throw new DestinationAccountCantReceiveException("Seller account can't make this type of transaction");
+                }
+
             }
             case CREDIT_PURCHASE -> {
                 if (destinationAccount == null) {

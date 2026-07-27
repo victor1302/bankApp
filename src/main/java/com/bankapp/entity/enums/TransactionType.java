@@ -4,5 +4,6 @@ public enum TransactionType {
     PIX_TRANSFER,
     CREDIT_PURCHASE,
     INVOICE_PAYMENT,
-    DEPOSIT
+    DEPOSIT,
+    INSTALLMENT_PAYMENT
 }

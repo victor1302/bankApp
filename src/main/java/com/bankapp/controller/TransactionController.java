@@ -1,5 +1,8 @@
 package com.bankapp.controller;
 
+import com.bankapp.dto.Installments.LedgerInstallmentResponse;
+import com.bankapp.dto.Installments.PayInstallmentRequestDto;
+import com.bankapp.dto.Installments.PayInstallmentResponseDto;
 import com.bankapp.dto.Transaction.*;
 import com.bankapp.interfaces.TransactionProjection;
 import com.bankapp.service.TransactionService;
@@ -58,5 +61,11 @@ public class TransactionController {
     direction = Sort.Direction.DESC) Pageable pageable){
         Map<String, Page<TransactionProjection>> transactions = transactionService.getTransactionByUser(accountId,pageable);
         return ResponseEntity.ok(transactions);
+    }
+    @PostMapping("/transactions/pay/installment")
+    @PreAuthorize("hasAnyAuthority('ROLE_ADMIN','ROLE_BASIC')")
+    public ResponseEntity<LedgerInstallmentResponse> payInstallment(@RequestBody PayInstallmentRequestDto payInstallmentRequestDto){
+        LedgerInstallmentResponse payInstallmentResponseDto = transactionService.payInstallment(payInstallmentRequestDto);
+        return ResponseEntity.ok(payInstallmentResponseDto);
     }
 }
