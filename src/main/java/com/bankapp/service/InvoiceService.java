@@ -60,7 +60,7 @@ public class InvoiceService {
         newInvoice.setInstallmentCount(crateInvoiceRequestDto.installmentCount());
         newInvoice.setStatus(InvoiceStatus.OPEN);
         newInvoice.setDescription(crateInvoiceRequestDto.description());
-        newInvoice.setClosingDate(yearMonth.plusMonths(crateInvoiceRequestDto.installmentCount()));
+        newInvoice.setClosingDate(null);
         newInvoice.setCreditCard(sourceAccountCard);
         newInvoice.setInstallments(installmentService.createInstallments(newInvoice));
 

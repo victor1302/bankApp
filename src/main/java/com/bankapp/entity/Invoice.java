@@ -6,6 +6,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.time.YearMonth;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +20,7 @@ public class Invoice {
     @Column(name = "invoice_id")
     private Long invoiceId;
     private YearMonth referenceMonth;
-    private YearMonth closingDate;
+    private Instant closingDate;
     private BigDecimal totalAmount;
     private BigDecimal amountPaid;
     @Enumerated(EnumType.STRING)
@@ -54,11 +55,11 @@ public class Invoice {
         this.referenceMonth = referenceMonth;
     }
 
-    public YearMonth getClosingDate() {
+    public Instant getClosingDate() {
         return closingDate;
     }
 
-    public void setClosingDate(YearMonth closingDate) {
+    public void setClosingDate(Instant closingDate) {
         this.closingDate = closingDate;
     }
 
